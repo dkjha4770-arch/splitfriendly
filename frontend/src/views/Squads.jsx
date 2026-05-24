@@ -107,6 +107,38 @@ export const Squads = () => {
     setMemberSearch('');
   };
 
+  // Helper to recruit user by direct handle or unique ID matching
+  const recruitUserByQuery = () => {
+    const query = memberSearch.trim().toLowerCase();
+    if (!query) return;
+
+    const foundUser = systemUsers.find(u => 
+      (u.name || '').toLowerCase() === query || 
+      (u.uid || '').toLowerCase() === query || 
+      (u.display_name || '').toLowerCase() === query ||
+      (u.uid || '').toLowerCase().endsWith(query)
+    );
+
+    if (!foundUser) {
+      alert('Operative not found in central registry.');
+      return;
+    }
+
+    addMember(foundUser);
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      recruitUserByQuery();
+    }
+  };
+
+  const handleRecruitClick = (e) => {
+    e.preventDefault();
+    recruitUserByQuery();
+  };
+
   // Remove member from temporary list
   const removeMemberFromDraft = (uid) => {
     // Current user can't remove themselves
@@ -281,14 +313,25 @@ export const Squads = () => {
             {/* Operative recruitment autocomplete search */}
             <div className="form-group" style={{ position: 'relative' }}>
               <label>Recruit new Operatives</label>
-              <div className="search-bar" style={{ width: '100%' }}>
-                <UserPlus size={16} style={{ color: 'var(--text-dim)' }} />
-                <input 
-                  type="text" 
-                  placeholder="Search by unique ID or username handle..." 
-                  value={memberSearch}
-                  onChange={e => setMemberSearch(e.target.value)}
-                />
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div className="search-bar" style={{ flex: 1 }}>
+                  <UserPlus size={16} style={{ color: 'var(--text-dim)' }} />
+                  <input 
+                    type="text" 
+                    placeholder="Search by unique ID or username handle..." 
+                    value={memberSearch}
+                    onChange={e => setMemberSearch(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  className="btn-glass"
+                  onClick={handleRecruitClick}
+                >
+                  <Plus size={16} />
+                  <span>Recruit</span>
+                </button>
               </div>
 
               {/* Autocomplete list */}
