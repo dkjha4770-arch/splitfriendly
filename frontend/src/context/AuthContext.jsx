@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(() => localStorage.getItem('sf_auth_token') || null);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('theme') || 'dark';
   });
@@ -13,12 +14,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/profile');
+        const storedToken = localStorage.getItem('sf_auth_token');
+        const headers = storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {};
+        const response = await fetch('/api/auth/profile', { headers });
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.user) {
             setUser(data.user);
           }
+        } else {
+          // Token invalid or expired — clear it
+          localStorage.removeItem('sf_auth_token');
+          setToken(null);
         }
       } catch (err) {
         console.error('Session check failed:', err);
@@ -54,6 +61,10 @@ export const AuthProvider = ({ children }) => {
     if (data.success && data.user) {
       setUser(data.user);
     }
+    if (data.token) {
+      setToken(data.token);
+      localStorage.setItem('sf_auth_token', data.token);
+    }
     return data;
   };
 
@@ -64,6 +75,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout request failed:', e);
     } finally {
       setUser(null);
+      setToken(null);
+      localStorage.removeItem('sf_auth_token');
       // Redirect to login page
       window.location.href = '/login';
     }
@@ -71,7 +84,9 @@ export const AuthProvider = ({ children }) => {
 
   const refreshProfile = async () => {
     try {
-      const response = await fetch('/api/auth/profile');
+      const storedToken = localStorage.getItem('sf_auth_token');
+      const headers = storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {};
+      const response = await fetch('/api/auth/profile', { headers });
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.user) {
@@ -84,7 +99,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, theme, toggleTheme, login, logout, refreshProfile }}>
+    <AuthContext.Provider value={{ user, token, loading, theme, toggleTheme, login, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

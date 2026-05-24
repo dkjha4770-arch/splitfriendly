@@ -13,7 +13,10 @@ import {
 } from 'lucide-react';
 
 export const Squads = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  
+  // Build auth headers for every API call (works on live Vercel→Render without cookie dependency)
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   
   // Data State
   const [squads, setSquads] = useState([]);
@@ -37,8 +40,8 @@ export const Squads = () => {
     try {
       setLoading(true);
       const [squadsRes, usersRes] = await Promise.all([
-        fetch('/api/squads'),
-        fetch('/api/users')
+        fetch('/api/squads', { headers: authHeaders }),
+        fetch('/api/users', { headers: authHeaders })
       ]);
 
       if (squadsRes.ok) {
@@ -183,7 +186,7 @@ export const Squads = () => {
     try {
       const res = await fetch('/api/squads/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(payload)
       });
 
@@ -208,7 +211,7 @@ export const Squads = () => {
     try {
       const res = await fetch('/api/squads/delete', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify({ id })
       });
 
