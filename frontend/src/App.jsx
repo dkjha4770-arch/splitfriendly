@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
+import UpdateBanner from './components/UpdateBanner';
 import Login from './views/Login';
 import Register from './views/Register';
 import Dashboard from './views/Dashboard';
@@ -65,6 +66,8 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        {/* Global update notification — appears on all pages after a new deploy */}
+        <UpdateBanner />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Landing />} />
