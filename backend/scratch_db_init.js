@@ -37,7 +37,7 @@ const queries = [
       FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
   ) ENGINE=InnoDB;`,
   
-  `INSERT IGNORE INTO users (username, password, unique_id) VALUES ('admin@splitfriendly', '$2a$10$T8Z40x9pC1pT7qH9X6zY3eUeKk7K87XW5Bw6S5R7o2k6qP5t4v9Wy', 'SPT-FLY-S0001');`
+  `INSERT IGNORE INTO users (username, password, unique_id) VALUES ('Deepak@splitfriendly', '$2a$10$Odw3DJeCOWLJYdUo6PN11Opgrk7GUpA.0PaUpk4Zv6HWdYia.9G.y', 'SPT-FLY-S0001');`
 ];
 
 async function setup() {
