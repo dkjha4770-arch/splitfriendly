@@ -151,7 +151,16 @@ router.get('/profile', authMiddleware, async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    return res.json({ success: true, user: rows[0] });
+
+    // Issue a fresh token so clients authenticated via cookie can store it
+    // for Bearer-based auth (fixes mobile Vercel->Render proxy issue).
+    const freshToken = jwt.sign(
+      { id: req.user.id, username: req.user.username, unique_id: req.user.unique_id },
+      process.env.JWT_SECRET || 'super_secret_splitfriendly_react_key_2026',
+      { expiresIn: '24h' }
+    );
+
+    return res.json({ success: true, user: rows[0], token: freshToken });
   } catch (err) {
     console.error('Get profile error:', err);
     return res.status(500).json({ error: 'Server error fetching profile.' });

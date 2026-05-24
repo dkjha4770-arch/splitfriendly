@@ -22,6 +22,13 @@ export const AuthProvider = ({ children }) => {
           if (data.success && data.user) {
             setUser(data.user);
           }
+          // Store/refresh the token returned by profile endpoint.
+          // This covers mobile users with an existing cookie session who
+          // don't yet have the token in localStorage.
+          if (data.token) {
+            setToken(data.token);
+            localStorage.setItem('sf_auth_token', data.token);
+          }
         } else {
           // Token invalid or expired — clear it
           localStorage.removeItem('sf_auth_token');
