@@ -24,7 +24,7 @@
   --btn-text-color: #ffffff;
   --secondary: #0ea5e9;
   --bg-color: #f0f9ff;
-  --sidebar-bg: rgba(255, 255, 255, 0.85);
+  --sidebar-bg: #ffffff;
   --card-bg: rgba(255, 255, 255, 0.7);
   --border-color: rgba(2, 132, 199, 0.15);
   --text-color: #0f172a;
@@ -1109,7 +1109,7 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   position: fixed;
   top: 1.25rem;
   left: 1rem;
-  background: var(--card-bg);
+  background: var(--sidebar-bg);
   border: 1px solid var(--border-color);
   color: var(--text-color);
   width: 40px;
@@ -1191,6 +1191,7 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     width: 280px;
     transform: translateX(-320px); /* Hidden offscreen on tablet/mobile by default */
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    background: var(--sidebar-bg) !important;
   }
   
   .sidebar.mobile-open {
@@ -1490,6 +1491,7 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     border-radius: 0 24px 24px 0;
     width: 280px;
     transform: translateX(-100%);
+    background: var(--sidebar-bg) !important;
   }
 
   .sidebar.mobile-open {
@@ -1587,6 +1589,16 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
   }
+
+  .flex-row-mobile-stack {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  .flex-row-mobile-stack > button,
+  .flex-row-mobile-stack > a {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+  }
 }
 
 /* === EXTRA SMALL DEVICES (under 480px) === */
@@ -1636,15 +1648,6 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     grid-template-columns: 1fr !important;
   }
 
-  .flex-row-mobile-stack {
-    flex-direction: column !important;
-    gap: 0.75rem !important;
-  }
-  .flex-row-mobile-stack > button,
-  .flex-row-mobile-stack > a {
-    flex: 1 1 auto !important;
-    width: 100% !important;
-  }
 }
 
 /* Choice screen selection cards */

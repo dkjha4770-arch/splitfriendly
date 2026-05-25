@@ -42,9 +42,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
-      <button className="sidebar-close-btn" onClick={onClose}>
-        <X size={18} />
-      </button>
 
       <Link to="/dashboard" className="sidebar-logo" onClick={onClose}>
         <span className="icon">💰</span>
