@@ -508,7 +508,7 @@ export const Settlements = () => {
                   <h4 style={{ fontSize: '0.8rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <History size={14} /> Tactical Split Archive
                   </h4>
-                  <div style={{ maxHeight: '300px', overflowY: 'auto', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.1)' }}>
+                  <div className="table-wrapper no-card-layout" style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'auto', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.1)', marginTop: 0 }}>
                     <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>

@@ -1305,19 +1305,19 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   }
 
   /* === TABLES → MOBILE CARD LAYOUT === */
-  .table-wrapper {
+  .table-wrapper:not(.no-card-layout) {
     margin-top: 1rem;
   }
 
-  .table-wrapper table {
+  .table-wrapper:not(.no-card-layout) table {
     border-spacing: 0 0.5rem;
   }
 
-  .table-wrapper thead {
+  .table-wrapper:not(.no-card-layout) thead {
     display: none;
   }
 
-  .table-wrapper tbody tr {
+  .table-wrapper:not(.no-card-layout) tbody tr {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem 0.75rem;
@@ -1330,7 +1330,7 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     position: relative;
   }
 
-  .table-wrapper tbody td {
+  .table-wrapper:not(.no-card-layout) tbody td {
     display: inline-flex;
     align-items: center;
     padding: 0;
@@ -1340,7 +1340,7 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     font-size: 0.85rem;
   }
 
-  .table-wrapper tbody td:first-child {
+  .table-wrapper:not(.no-card-layout) tbody td:first-child {
     border: none;
     border-radius: 0;
     font-size: 0.75rem;
@@ -1348,7 +1348,7 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     font-weight: 600;
   }
 
-  .table-wrapper tbody td:last-child {
+  .table-wrapper:not(.no-card-layout) tbody td:last-child {
     border: none;
     border-radius: 0;
     position: absolute;
@@ -1359,11 +1359,49 @@ tr { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   }
 
   /* Amount column — make it stand out */
-  .table-wrapper tbody td[style*="text-align: right"] {
+  .table-wrapper:not(.no-card-layout) tbody td[style*="text-align: right"] {
     width: 100%;
     justify-content: flex-start;
     font-size: 1.1rem;
     margin-top: 0.25rem;
+  }
+
+  .table-wrapper.no-card-layout {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 1rem;
+  }
+
+  .table-wrapper.no-card-layout table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+  }
+
+  .table-wrapper.no-card-layout td {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .table-wrapper.no-card-layout td:first-child {
+    border-left: 1px solid var(--border-color);
+    border-radius: 12px 0 0 12px;
+  }
+
+  .table-wrapper.no-card-layout td:last-child {
+    border-right: 1px solid var(--border-color);
+    border-radius: 0 12px 12px 0;
+  }
+
+  .table-wrapper.no-card-layout th {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
   }
 
   /* Operatives roster table card layout on mobile */

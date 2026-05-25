@@ -572,7 +572,7 @@ export const ExpenseForm = () => {
 
               <div className="form-group">
                 <label>Operatives Quantities Grid</label>
-                <div className="table-wrapper" style={{ border: '1px solid var(--border-color)', borderRadius: '18px', background: 'rgba(0,0,0,0.1)' }}>
+                <div className="table-wrapper no-card-layout" style={{ border: '1px solid var(--border-color)', borderRadius: '18px', background: 'rgba(0,0,0,0.1)' }}>
                   <table>
                     <thead>
                       <tr>
