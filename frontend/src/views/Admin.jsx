@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 
 export const Admin = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   
   // States
   const [users, setUsers] = useState([]);
@@ -40,7 +41,7 @@ export const Admin = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch('/api/users');
+      const res = await fetch('/api/users', { headers: authHeaders });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to retrieve operatives roster.');
@@ -81,7 +82,10 @@ export const Admin = () => {
     try {
       const res = await fetch('/api/users/reset-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify({
           user_id: userId,
           new_password: newPassword.trim()
@@ -113,7 +117,10 @@ export const Admin = () => {
     try {
       const res = await fetch('/api/users/delete', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify({ user_id: userId })
       });
 

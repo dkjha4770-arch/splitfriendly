@@ -22,7 +22,8 @@ const CATEGORIES = {
 };
 
 export const Analytics = () => {
-  const { user, theme } = useAuth();
+  const { user, token, theme } = useAuth();
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   const catChartRef = useRef(null);
   const trendChartRef = useRef(null);
   const catChartInstance = useRef(null);
@@ -57,7 +58,7 @@ export const Analytics = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/expenses/data');
+      const res = await fetch('/api/expenses/data', { headers: authHeaders });
       if (res.ok) {
         const data = await res.json();
         setExpenses(data.expenses || []);

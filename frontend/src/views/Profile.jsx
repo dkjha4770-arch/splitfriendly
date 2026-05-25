@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 
 export const Profile = () => {
-  const { user, theme, toggleTheme, refreshProfile } = useAuth();
+  const { user, token, theme, toggleTheme, refreshProfile } = useAuth();
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   
   // State
   const [displayName, setDisplayName] = useState('');
@@ -55,7 +56,10 @@ export const Profile = () => {
       setLoading(true);
       const res = await fetch('/api/auth/profile', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify({
           display_name: displayName,
           dob_day: dobDay,
@@ -88,7 +92,10 @@ export const Profile = () => {
       setSuccessMsg('');
       const res = await fetch('/api/auth/profile', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify({
           display_name: displayName,
           dob_day: dobDay,

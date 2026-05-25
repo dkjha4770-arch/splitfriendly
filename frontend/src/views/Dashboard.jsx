@@ -35,7 +35,8 @@ const PAYMENT_APPS = {
 };
 
 export const Dashboard = () => {
-  const { user, theme } = useAuth();
+  const { user, token, theme } = useAuth();
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   const navigate = useNavigate();
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
@@ -87,7 +88,7 @@ export const Dashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/expenses/data');
+      const res = await fetch('/api/expenses/data', { headers: authHeaders });
       if (!res.ok) throw new Error('Secure connection failed.');
       const data = await res.json();
       setExpenses(data.expenses || []);
@@ -322,7 +323,10 @@ export const Dashboard = () => {
     try {
       const res = await fetch('/api/expenses', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify(body)
       });
       const data = await res.json();
@@ -347,7 +351,10 @@ export const Dashboard = () => {
     try {
       const res = await fetch('/api/expenses/delete', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify({ id: deleteModal.id })
       });
       const data = await res.json();

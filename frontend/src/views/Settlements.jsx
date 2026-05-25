@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 
 export const Settlements = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   const [expenses, setExpenses] = useState([]);
   const [squads, setSquads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +51,7 @@ export const Settlements = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/expenses/data');
+      const res = await fetch('/api/expenses/data', { headers: authHeaders });
       if (!res.ok) throw new Error('Failed to load transaction data.');
       const data = await res.json();
       setExpenses(data.expenses || []);
@@ -244,7 +245,10 @@ export const Settlements = () => {
     try {
       const res = await fetch('/api/expenses', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify(body)
       });
       const data = await res.json();

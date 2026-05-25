@@ -29,7 +29,8 @@ const PAYMENT_APPS = {
 };
 
 export const Expenses = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   
   // Data State
   const [expenses, setExpenses] = useState([]);
@@ -67,7 +68,7 @@ export const Expenses = () => {
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/expenses');
+      const res = await fetch('/api/expenses', { headers: authHeaders });
       if (!res.ok) throw new Error('Secure connection failed.');
       const data = await res.json();
       setExpenses(data || []);
@@ -116,7 +117,10 @@ export const Expenses = () => {
     try {
       const res = await fetch('/api/expenses/delete', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify({ id: deleteModal.id })
       });
       const data = await res.json();

@@ -31,7 +31,7 @@ const PAYMENT_APPS = [
 ];
 
 export const ExpenseForm = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -72,6 +72,7 @@ export const ExpenseForm = () => {
   const [quantities, setQuantities] = useState({}); // { [username]: quantity }
 
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
 
   // Fetch initial configuration
   useEffect(() => {
@@ -80,8 +81,8 @@ export const ExpenseForm = () => {
         setLoading(true);
         // Fetch squads & system users
         const [squadsRes, usersRes] = await Promise.all([
-          fetch('/api/squads'),
-          fetch('/api/users')
+          fetch('/api/squads', { headers: authHeaders }),
+          fetch('/api/users', { headers: authHeaders })
         ]);
         
         if (squadsRes.ok) {
@@ -201,7 +202,10 @@ export const ExpenseForm = () => {
         const updatedMembers = [...activeSquad.members, { name: foundUser.name, uid: foundUser.uid }];
         fetch('/api/squads/save', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...authHeaders
+          },
           body: JSON.stringify({
             id: activeSquad.id,
             name: activeSquad.name,
@@ -210,7 +214,7 @@ export const ExpenseForm = () => {
         }).then(res => {
           if (res.ok) {
             // Reload squads to reflect persistent sync
-            fetch('/api/squads')
+            fetch('/api/squads', { headers: authHeaders })
               .then(r => r.json())
               .then(data => setSquads(data || []));
           }
@@ -307,7 +311,10 @@ export const ExpenseForm = () => {
     try {
       const res = await fetch('/api/expenses', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
