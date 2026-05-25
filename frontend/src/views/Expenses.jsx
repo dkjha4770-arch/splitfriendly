@@ -81,8 +81,10 @@ export const Expenses = () => {
   };
 
   useEffect(() => {
-    fetchExpenses();
-  }, []);
+    if (token) {
+      fetchExpenses();
+    }
+  }, [token]);
 
   // Handle Month Navigation
   const navigateMonth = (direction) => {

@@ -65,8 +65,10 @@ export const Settlements = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
 
   // Helper: check if a user is in expense members
   const hasMember = (mems, name) => {

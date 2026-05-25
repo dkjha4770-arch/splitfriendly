@@ -34,16 +34,22 @@ function Layout() {
         onClick={() => setSidebarOpen(false)}
       ></div>
 
-      {/* Main Content Pane */}
-      <main className="main-content">
-        {/* Toggle button for mobile */}
+      {/* Mobile Top Navigation Bar */}
+      <div className="mobile-top-nav">
         <button 
           className="mobile-menu-toggle-btn" 
           onClick={() => setSidebarOpen(true)}
         >
           <Menu size={20} />
         </button>
+        <div className="mobile-nav-logo">
+          <span className="logo-icon">💰</span>
+          <span className="logo-text">SPLIT-FRIENDLY</span>
+        </div>
+      </div>
 
+      {/* Main Content Pane */}
+      <main className="main-content">
         {/* Global style to show mobile menu button when width <= 1024px */}
         <style>{`
           @media (max-width: 1024px) {

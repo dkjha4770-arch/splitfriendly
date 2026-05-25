@@ -107,8 +107,10 @@ export const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
 
   // Filtered expenses for selected month
   const monthlyExpenses = expenses.filter(e => e.date.substring(0, 7) === selectedMonth);

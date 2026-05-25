@@ -60,8 +60,10 @@ export const Squads = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
 
   // Form handler: Start creating a squad
   const startCreate = () => {

@@ -13,7 +13,7 @@ const versionStampPlugin = {
       version: buildId,
       buildTime: new Date().toISOString()
     });
-    writeFileSync(resolve(__dirname, 'public/version.json'), payload);
+    writeFileSync(resolve('public/version.json'), payload);
     console.log(`[version-stamp] Build ID: ${buildId}`);
   }
 };

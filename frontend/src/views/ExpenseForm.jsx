@@ -104,8 +104,10 @@ export const ExpenseForm = () => {
         setLoading(false);
       }
     };
-    initData();
-  }, []);
+    if (token) {
+      initData();
+    }
+  }, [token]);
 
   // Update members when squad selection changes
   useEffect(() => {
@@ -254,9 +256,9 @@ export const ExpenseForm = () => {
       return;
     }
 
-    let finalAmount = 0;
-    let finalShare = 0;
-    let finalMembers = null;
+    let finalAmount;
+    let finalShare;
+    let finalMembers;
 
     if (mode === 'group') {
       finalAmount = parsedAmount;

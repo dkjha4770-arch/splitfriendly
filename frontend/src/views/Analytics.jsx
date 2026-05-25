@@ -72,8 +72,10 @@ export const Analytics = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
 
   // Compute stats for current filters
   const filteredBySquad = expenses.filter(e => squadFilter === 'all' || e.squad_name === squadFilter);
