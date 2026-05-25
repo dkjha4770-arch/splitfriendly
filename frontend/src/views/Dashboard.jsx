@@ -21,7 +21,7 @@ Chart.register(...registerables);
 const CATEGORIES = {
   food: { label: 'Food & Rations', color: '#ffaa00' },
   rent: { label: 'Base Rent', color: '#00d2ff' },
-  travel: { label: 'Transport & Travel', color: '#9d00ff' },
+  travel: { label: 'Transport & Travel', color: '#0ea5e9' },
   utility: { label: 'Infrastructure/Utilities', color: '#ff007f' },
   other: { label: 'Unclassified Operations', color: '#868e96' }
 };

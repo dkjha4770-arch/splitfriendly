@@ -15,7 +15,7 @@ import {
 const CATEGORIES = {
   food: { label: 'Food & Rations', color: '#ffaa00' },
   rent: { label: 'Base Rent', color: '#00d2ff' },
-  travel: { label: 'Transport & Travel', color: '#9d00ff' },
+  travel: { label: 'Transport & Travel', color: '#0ea5e9' },
   utility: { label: 'Infrastructure/Utilities', color: '#ff007f' },
   other: { label: 'Unclassified Operations', color: '#868e96' }
 };
@@ -255,7 +255,7 @@ export const Expenses = () => {
                       </td>
                       <td>
                         <div style={{ fontWeight: 700 }}>{e.where_spent}</div>
-                        {e.squad_name && <span style={{ fontSize: '0.65rem', background: 'rgba(157, 0, 255, 0.1)', color: 'var(--primary)', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>SQUAD: {e.squad_name}</span>}
+                        {e.squad_name && <span style={{ fontSize: '0.65rem', background: 'rgba(14, 165, 233, 0.1)', color: 'var(--primary)', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>SQUAD: {e.squad_name}</span>}
                       </td>
                       <td><span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{e.payer}</span></td>
                       <td>

@@ -675,7 +675,7 @@ export const ExpenseForm = () => {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem',
-                          boxShadow: isSelected ? '0 0 15px rgba(157, 0, 255, 0.2)' : 'none',
+                          boxShadow: isSelected ? '0 0 15px rgba(56, 189, 248, 0.25)' : 'none',
                           transition: 'all 0.3s ease'
                         }}>
                           <div className="avatar-mini" style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>

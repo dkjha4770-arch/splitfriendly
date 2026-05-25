@@ -16,7 +16,7 @@ Chart.register(...registerables);
 const CATEGORIES = {
   food: { label: 'Food & Rations', color: '#ffaa00' },
   rent: { label: 'Base Rent', color: '#00d2ff' },
-  travel: { label: 'Transport & Travel', color: '#9d00ff' },
+  travel: { label: 'Transport & Travel', color: '#0ea5e9' },
   utility: { label: 'Infrastructure/Utilities', color: '#ff007f' },
   other: { label: 'Unclassified Operations', color: '#868e96' }
 };
@@ -202,13 +202,13 @@ export const Analytics = () => {
         datasets: [{
           label: 'Operational Spend (INR)',
           data: trendData,
-          borderColor: '#9d00ff',
-          backgroundColor: 'rgba(157, 0, 255, 0.1)',
+          borderColor: '#0ea5e9',
+          backgroundColor: 'rgba(14, 165, 233, 0.1)',
           fill: true,
           tension: 0.4,
           borderWidth: 3,
           pointRadius: 4,
-          pointBackgroundColor: '#9d00ff',
+          pointBackgroundColor: '#0ea5e9',
           pointBorderColor: 'transparent'
         }]
       },
@@ -306,7 +306,7 @@ export const Analytics = () => {
             </div>
 
             <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ background: 'rgba(157, 0, 255, 0.1)', color: 'var(--primary)', borderRadius: '12px', padding: '0.75rem', display: 'flex', alignItems: 'center' }}>
+              <div style={{ background: 'rgba(14, 165, 233, 0.1)', color: 'var(--primary)', borderRadius: '12px', padding: '0.75rem', display: 'flex', alignItems: 'center' }}>
                 <Activity size={24} />
               </div>
               <div>

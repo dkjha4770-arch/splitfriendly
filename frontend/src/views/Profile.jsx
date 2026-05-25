@@ -117,7 +117,7 @@ export const Profile = () => {
 
   // Google Charts QR URL
   const qrUrl = user?.unique_id 
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(user.unique_id)}&color=9d00ff&bgcolor=ffffff`
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(user.unique_id)}&color=0ea5e9&bgcolor=ffffff`
     : '';
 
   return (
@@ -172,11 +172,11 @@ export const Profile = () => {
             {/* Color Swatch Picker */}
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', margin: '0 auto 1.5rem', maxWidth: '280px', zIndex: 1, position: 'relative' }}>
               {[
-                '135deg,#9d00ff,#00d2ff',
+                '135deg,#0ea5e9,#00d2ff',
                 '135deg,#ff3b30,#ff9500',
                 '135deg,#00d68f,#00b5d8',
                 '135deg,#f7b731,#fd9644',
-                '135deg,#ee00ff,#9d00ff',
+                '135deg,#38bdf8,#0ea5e9',
                 '135deg,#0099ff,#00d2ff',
                 '135deg,#2ecc71,#1abc9c',
                 '135deg,#e74c3c,#c0392b'
