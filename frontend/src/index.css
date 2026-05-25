@@ -644,6 +644,16 @@ input:focus, select:focus, textarea:focus {
   overflow-x: auto;
 }
 
+.qty-input {
+  width: 80px !important;
+  max-width: 80px !important;
+  text-align: center !important;
+  padding: 0.4rem 0.5rem !important;
+  height: 38px !important;
+  border-radius: 10px !important;
+  display: inline-block !important;
+}
+
 table {
   width: 100%;
   border-collapse: separate;

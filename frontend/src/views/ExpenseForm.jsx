@@ -606,7 +606,7 @@ export const ExpenseForm = () => {
                                 type="number" 
                                 min="0" 
                                 step="1" 
-                                style={{ width: '80px', textAlign: 'center', padding: '0.4rem' }}
+                                className="qty-input"
                                 value={qty === 0 ? '' : qty}
                                 onChange={e => handleQuantityChange(m.name, e.target.value)}
                               />
