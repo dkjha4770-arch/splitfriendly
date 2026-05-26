@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ModalPortal from '../components/ModalPortal';
 import { 
   ShieldAlert, 
   Trash2, 
@@ -250,69 +251,73 @@ export const Admin = () => {
 
       {/* Reset Key Modal */}
       {resetModal.isOpen && (
-        <div className="modal-overlay" onClick={() => setResetModal({ isOpen: false, userId: null, username: '', newPassword: '' })}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Key size={18} style={{ color: 'var(--primary)' }} />
-                <span>Override Secret Key</span>
-              </h3>
-              <button className="btn-delete" style={{ padding: '4px' }} onClick={() => setResetModal({ isOpen: false, userId: null, username: '', newPassword: '' })}>
-                <X size={16} />
-              </button>
-            </div>
-            
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.25rem', lineHeight: '1.4' }}>
-              You are overriding the authentication key for <strong style={{ color: 'var(--text-color)' }}>{resetModal.username}</strong>.
-            </p>
-
-            <form onSubmit={executeReset} style={{ display: 'grid', gap: '1rem' }}>
-              <div className="form-group">
-                <label>New Secret Key (Password)</label>
-                <input 
-                  type="password" 
-                  placeholder="Min 6 characters"
-                  value={resetModal.newPassword}
-                  onChange={e => setResetModal(prev => ({ ...prev, newPassword: e.target.value }))}
-                  required
-                />
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setResetModal({ isOpen: false, userId: null, username: '', newPassword: '' })}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Key size={18} style={{ color: 'var(--primary)' }} />
+                  <span>Override Secret Key</span>
+                </h3>
+                <button className="btn-delete" style={{ padding: '4px' }} onClick={() => setResetModal({ isOpen: false, userId: null, username: '', newPassword: '' })}>
+                  <X size={16} />
+                </button>
               </div>
               
-              <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button type="button" className="btn-glass" style={{ flex: 1 }} onClick={() => setResetModal({ isOpen: false, userId: null, username: '', newPassword: '' })}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn-primary" style={{ flex: 1, marginTop: 0 }}>
-                  Override Key
-                </button>
-              </div>
-            </form>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.25rem', lineHeight: '1.4' }}>
+                You are overriding the authentication key for <strong style={{ color: 'var(--text-color)' }}>{resetModal.username}</strong>.
+              </p>
+
+              <form onSubmit={executeReset} style={{ display: 'grid', gap: '1rem' }}>
+                <div className="form-group">
+                  <label>New Secret Key (Password)</label>
+                  <input 
+                    type="password" 
+                    placeholder="Min 6 characters"
+                    value={resetModal.newPassword}
+                    onChange={e => setResetModal(prev => ({ ...prev, newPassword: e.target.value }))}
+                    required
+                  />
+                </div>
+                
+                <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                  <button type="button" className="btn-glass" style={{ flex: 1 }} onClick={() => setResetModal({ isOpen: false, userId: null, username: '', newPassword: '' })}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary" style={{ flex: 1, marginTop: 0 }}>
+                    Override Key
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Decommission Confirm Modal */}
       {deleteModal.isOpen && (
-        <div className="modal-overlay" onClick={() => setDeleteModal({ isOpen: false, userId: null, username: '' })}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ff3b30', marginBottom: '1rem' }}>Confirm Decommissioning</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-              Are you sure you want to permanently decommission <strong style={{ color: 'var(--text-color)' }}>{deleteModal.username}</strong>? All access tokens will be invalidated, and their profile will be removed.
-            </p>
-            <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '0.75rem' }}>
-              <button className="btn-glass" style={{ flex: 1 }} onClick={() => setDeleteModal({ isOpen: false, userId: null, username: '' })}>
-                Cancel
-              </button>
-              <button 
-                className="btn-primary" 
-                style={{ flex: 1, marginTop: 0, background: '#ff3b30', boxShadow: 'none' }}
-                onClick={executeDelete}
-              >
-                Decommission
-              </button>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setDeleteModal({ isOpen: false, userId: null, username: '' })}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ff3b30', marginBottom: '1rem' }}>Confirm Decommissioning</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '1.5rem', lineHeight: '1.4' }}>
+                Are you sure you want to permanently decommission <strong style={{ color: 'var(--text-color)' }}>{deleteModal.username}</strong>? All access tokens will be invalidated, and their profile will be removed.
+              </p>
+              <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '0.75rem' }}>
+                <button className="btn-glass" style={{ flex: 1 }} onClick={() => setDeleteModal({ isOpen: false, userId: null, username: '' })}>
+                  Cancel
+                </button>
+                <button 
+                  className="btn-primary" 
+                  style={{ flex: 1, marginTop: 0, background: '#ff3b30', boxShadow: 'none' }}
+                  onClick={executeDelete}
+                >
+                  Decommission
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

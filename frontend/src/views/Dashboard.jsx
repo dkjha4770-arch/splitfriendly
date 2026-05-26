@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ModalPortal from '../components/ModalPortal';
 import { 
   Plus, 
   ArrowRight, 
@@ -652,30 +653,32 @@ export const Dashboard = () => {
 
       {/* Delete Modal Dialog */}
       {deleteModal.isOpen && (
-        <div className="modal-overlay" onClick={() => setDeleteModal({ isOpen: false, id: null })}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem', color: '#ff3b30' }}>Delete Entry?</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-              This record will be permanently deleted from the active tactical ledger database. This operation is irreversible.
-            </p>
-            <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-              <button 
-                className="btn-glass" 
-                style={{ flex: 1 }}
-                onClick={() => setDeleteModal({ isOpen: false, id: null })}
-              >
-                Cancel
-              </button>
-              <button 
-                className="btn-primary" 
-                style={{ flex: 1, marginTop: 0, background: '#ff3b30', boxShadow: 'none' }}
-                onClick={executeDelete}
-              >
-                Delete Entry
-              </button>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setDeleteModal({ isOpen: false, id: null })}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem', color: '#ff3b30' }}>Delete Entry?</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '1.5rem', lineHeight: '1.4' }}>
+                This record will be permanently deleted from the active tactical ledger database. This operation is irreversible.
+              </p>
+              <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                <button 
+                  className="btn-glass" 
+                  style={{ flex: 1 }}
+                  onClick={() => setDeleteModal({ isOpen: false, id: null })}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="btn-primary" 
+                  style={{ flex: 1, marginTop: 0, background: '#ff3b30', boxShadow: 'none' }}
+                  onClick={executeDelete}
+                >
+                  Delete Entry
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

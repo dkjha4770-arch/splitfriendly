@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ModalPortal from '../components/ModalPortal';
 import { 
   Calendar, 
   DollarSign, 
@@ -736,67 +737,50 @@ export const Settlements = () => {
 
       {/* Confirmation Modal */}
       {modal.isOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          background: 'rgba(0, 0, 0, 0.75)'
-        }}>
-          <div className="card animate-slide-in" style={{
-            width: '100%',
-            maxWidth: '440px',
-            padding: '2rem',
-            background: 'rgba(23, 21, 48, 0.95)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '24px',
-            textAlign: 'center'
-          }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem', textTransform: 'uppercase', color: modal.heOwesMe ? '#10b981' : '#f59e0b' }}>
-              {modal.heOwesMe ? 'Collect Settlement' : 'Record Settlement'}
-            </h3>
-            
-            <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-              Confirm settlement of <strong>₹ {modal.amount.toFixed(2)}</strong> {modal.heOwesMe ? `received from ${modal.otherUser}` : `paid to ${modal.otherUser}`}.
-            </p>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setModal(prev => ({ ...prev, isOpen: false }))}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', maxWidth: '440px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem', textTransform: 'uppercase', color: modal.heOwesMe ? '#10b981' : '#f59e0b' }}>
+                {modal.heOwesMe ? 'Collect Settlement' : 'Record Settlement'}
+              </h3>
+              
+              <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                Confirm settlement of <strong>₹ {modal.amount.toFixed(2)}</strong> {modal.heOwesMe ? `received from ${modal.otherUser}` : `paid to ${modal.otherUser}`}.
+              </p>
 
-            <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-              <button 
-                onClick={executeSettlement}
-                className="btn-primary" 
-                style={{ 
-                  flex: 1, 
-                  padding: '0.8rem', 
-                  borderRadius: '12px', 
-                  fontWeight: 700, 
-                  background: modal.heOwesMe ? '#10b981' : 'var(--primary)' 
-                }}
-              >
-                {modal.heOwesMe ? '✓ Mark Received' : '✓ Mark Paid'}
-              </button>
-              <button 
-                onClick={() => setModal(prev => ({ ...prev, isOpen: false }))}
-                className="btn-glass" 
-                style={{ 
-                  flex: 1, 
-                  padding: '0.8rem', 
-                  borderRadius: '12px', 
-                  fontWeight: 700, 
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--input-bg)',
-                  color: 'var(--text-color)'
-                }}
-              >
-                Cancel
-              </button>
+              <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <button 
+                  onClick={executeSettlement}
+                  className="btn-primary" 
+                  style={{ 
+                    flex: 1, 
+                    padding: '0.8rem', 
+                    borderRadius: '12px', 
+                    fontWeight: 700, 
+                    background: modal.heOwesMe ? '#10b981' : 'var(--primary)' 
+                  }}
+                >
+                  {modal.heOwesMe ? '✓ Mark Received' : '✓ Mark Paid'}
+                </button>
+                <button 
+                  onClick={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                  className="btn-glass" 
+                  style={{ 
+                    flex: 1, 
+                    padding: '0.8rem', 
+                    borderRadius: '12px', 
+                    fontWeight: 700, 
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--input-bg)',
+                    color: 'var(--text-color)'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );
