@@ -48,8 +48,8 @@ export const Login = () => {
         background: 'var(--card-bg)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/logo.jpg" alt="Logo" className="logo-img-login" />
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem', letterSpacing: '-1px' }}>
+          <span style={{ fontSize: '3rem', filter: 'drop-shadow(0 0 10px var(--primary))' }}>💰</span>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '1rem', letterSpacing: '-1px' }}>
             SPLIT-FRIENDLY
           </h2>
           <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
