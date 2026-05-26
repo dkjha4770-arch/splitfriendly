@@ -99,6 +99,10 @@ export const AuthProvider = ({ children }) => {
         if (data.success && data.user) {
           setUser(data.user);
         }
+        if (data.token) {
+          setToken(data.token);
+          localStorage.setItem('sf_auth_token', data.token);
+        }
       }
     } catch (err) {
       console.error('Profile refresh error:', err);

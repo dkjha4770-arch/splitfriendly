@@ -155,7 +155,7 @@ router.get('/profile', authMiddleware, async (req, res) => {
     // Issue a fresh token so clients authenticated via cookie can store it
     // for Bearer-based auth (fixes mobile Vercel->Render proxy issue).
     const freshToken = jwt.sign(
-      { id: req.user.id, username: req.user.username, unique_id: req.user.unique_id },
+      { id: req.user.id, username: rows[0].username, unique_id: rows[0].unique_id },
       process.env.JWT_SECRET || 'super_secret_splitfriendly_react_key_2026',
       { expiresIn: '24h' }
     );
@@ -214,10 +214,25 @@ router.post('/profile', authMiddleware, async (req, res) => {
       await db.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, id]);
     }
 
+    // Generate fresh token with the new unique_id
+    const freshToken = jwt.sign(
+      { id, username: req.user.username, unique_id: newUid },
+      process.env.JWT_SECRET || 'super_secret_splitfriendly_react_key_2026',
+      { expiresIn: '24h' }
+    );
+
+    // Update cookie
+    res.cookie('token', freshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
     return res.json({
       success: true,
       unique_id: newUid,
-      display_name: display_name
+      display_name: display_name,
+      token: freshToken
     });
   } catch (err) {
     console.error('Update profile error:', err);
