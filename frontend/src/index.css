@@ -200,10 +200,34 @@ body {
 }
 
 
-.sidebar-logo .icon {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 0 10px var(--primary));
+.sidebar-logo .logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 0 8px var(--primary));
   animation: floatingLogo 4s infinite ease-in-out;
+  border: 1px solid var(--border-color);
+}
+
+.mobile-nav-logo .logo-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.logo-img-login {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--border-color);
+  animation: floatingLogo 5s infinite ease-in-out;
+  display: inline-block;
 }
 
 @keyframes floatingLogo {

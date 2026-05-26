@@ -65,8 +65,8 @@ function Layout() {
         >
           <Menu size={20} />
         </button>
-        <div className="mobile-nav-logo">
-          <span className="logo-icon">💰</span>
+        <div className="mobile-nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <img src="/logo.jpg" alt="Logo" className="logo-img" />
           <span className="logo-text">SPLIT-FRIENDLY</span>
         </div>
       </div>

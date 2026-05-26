@@ -44,7 +44,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
     <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
 
       <Link to="/dashboard" className="sidebar-logo" onClick={onClose}>
-        <span className="icon">💰</span>
+        <img src="/logo.jpg" alt="Logo" className="logo-img" />
         <h1>SPLIT-FRIENDLY</h1>
       </Link>
 
