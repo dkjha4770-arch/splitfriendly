@@ -36,6 +36,22 @@ router.get('/', authMiddleware, async (req, res) => {
     const myUniqueId = (meRows[0]?.unique_id || '').toLowerCase();
     const myHandle = username.split('@')[0].toLowerCase();
 
+    // Fetch all users to construct an avatar and displayName mapping
+    const allUsers = await db.query('SELECT username, display_name, avatar_color, unique_id FROM users');
+    const userMap = {};
+    for (const u of allUsers) {
+      const handle = u.username.split('@')[0].toLowerCase();
+      const info = {
+        displayName: u.display_name || handle,
+        avatarColor: u.avatar_color,
+        uid: u.unique_id
+      };
+      userMap[handle] = info;
+      if (u.unique_id) {
+        userMap[u.unique_id.toLowerCase()] = info;
+      }
+    }
+
     // Fetch all squads
     const rawSquads = await db.query(
       'SELECT s.id, s.name, s.creator_id, s.members, u.username as creator FROM squads s JOIN users u ON s.creator_id = u.id'
@@ -66,13 +82,16 @@ router.get('/', authMiddleware, async (req, res) => {
       }
 
       if (s.creator_id === userId || isMember) {
-        // Rewrite squad member names to user aliases
+        // Rewrite squad member names to user aliases and inject profile info
         const updatedMems = mems.map(m => {
           if (m && m.name) {
             const ml = m.name.split('@')[0].toLowerCase();
+            const mappedUser = userMap[ml] || {};
             return {
               ...m,
-              name: aliasMap[ml] || ml
+              name: aliasMap[ml] || ml,
+              display_name: mappedUser.displayName || m.display_name || ml,
+              avatar_color: mappedUser.avatarColor || m.avatar_color || '135deg,#9d00ff,#00d2ff'
             };
           }
           return m;

@@ -78,6 +78,28 @@ router.get('/data', authMiddleware, async (req, res) => {
     );
     const expenses = rawExpenses.map(exp => processExpenseAliases(exp, aliasMap));
 
+    // Fetch all users to construct an avatar and displayName mapping
+    const allUsers = await db.query('SELECT username, display_name, avatar_color, unique_id FROM users');
+    const userMap = {};
+    const userProfiles = allUsers.map(u => {
+      const handle = u.username.split('@')[0].toLowerCase();
+      const info = {
+        displayName: u.display_name || handle,
+        avatarColor: u.avatar_color,
+        uid: u.unique_id
+      };
+      userMap[handle] = info;
+      if (u.unique_id) {
+        userMap[u.unique_id.toLowerCase()] = info;
+      }
+      return {
+        username: handle,
+        display_name: u.display_name,
+        avatar_color: u.avatar_color,
+        unique_id: u.unique_id
+      };
+    });
+
     // Fetch squads
     const rawSquads = await db.query(
       'SELECT s.id, s.name, s.creator_id, s.members, u.username as creator FROM squads s JOIN users u ON s.creator_id = u.id'
@@ -109,13 +131,16 @@ router.get('/data', authMiddleware, async (req, res) => {
       }
 
       if (s.creator_id === userId || isMember) {
-        // Rewrite squad member names to user aliases
+        // Rewrite squad member names to user aliases and inject profile info
         const updatedMems = mems.map(m => {
           if (m && m.name) {
             const ml = m.name.split('@')[0].toLowerCase();
+            const mappedUser = userMap[ml] || {};
             return {
               ...m,
-              name: aliasMap[ml] || ml
+              name: aliasMap[ml] || ml,
+              display_name: mappedUser.displayName || m.display_name || ml,
+              avatar_color: mappedUser.avatarColor || m.avatar_color || '135deg,#9d00ff,#00d2ff'
             };
           }
           return m;
@@ -125,7 +150,7 @@ router.get('/data', authMiddleware, async (req, res) => {
       }
     }
 
-    return res.json({ expenses, squads: mySquads });
+    return res.json({ expenses, squads: mySquads, users: userProfiles });
   } catch (err) {
     console.error('Error fetching data:', err);
     return res.status(500).json({ error: err.message });

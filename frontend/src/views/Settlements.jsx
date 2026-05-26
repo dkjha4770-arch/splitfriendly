@@ -20,6 +20,7 @@ export const Settlements = () => {
   const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   const [expenses, setExpenses] = useState([]);
   const [squads, setSquads] = useState([]);
+  const [systemUsers, setSystemUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -57,6 +58,7 @@ export const Settlements = () => {
       const data = await res.json();
       setExpenses(data.expenses || []);
       setSquads(data.squads || []);
+      setSystemUsers(data.users || []);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -200,9 +202,11 @@ export const Settlements = () => {
         }
       });
 
+      const matchedUser = systemUsers.find(u => u.username === name) || {};
       return {
         username: name,
-        displayName: name,
+        displayName: matchedUser.display_name || name,
+        avatarColor: matchedUser.avatar_color,
         balance: netRelDebt
       };
     });
@@ -486,7 +490,23 @@ export const Settlements = () => {
                         style={{ width: '100%', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '12px', padding: '0.9rem', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                          <div className="user-avatar" style={{ width: 35, height: 35, fontSize: '0.8rem', background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'var(--card-bg)', flexShrink: 0 }}>
+                          <div 
+                            className="user-avatar" 
+                            style={{ 
+                              width: 38, 
+                              height: 38, 
+                              fontSize: '0.9rem', 
+                              fontWeight: 800,
+                              color: '#ffffff',
+                              background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))', 
+                              flexShrink: 0,
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
                             {m.displayName[0].toUpperCase()}
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -629,7 +649,23 @@ export const Settlements = () => {
                           style={{ width: '100%', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '12px', padding: '0.9rem', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                            <div className="user-avatar" style={{ width: 35, height: 35, fontSize: '0.8rem', background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'var(--card-bg)', flexShrink: 0 }}>
+                            <div 
+                              className="user-avatar" 
+                              style={{ 
+                                width: 38, 
+                                height: 38, 
+                                fontSize: '0.9rem', 
+                                fontWeight: 800,
+                                color: '#ffffff',
+                                background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))', 
+                                flexShrink: 0,
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
                               {m.displayName[0].toUpperCase()}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -706,9 +742,25 @@ export const Settlements = () => {
                         style={{ width: '100%', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '12px', padding: '0.9rem', background: 'rgba(255,255,255,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                          <div className="user-avatar" style={{ width: 35, height: 35, fontSize: '0.8rem', background: 'var(--card-bg)', flexShrink: 0 }}>
-                            {m.displayName[0].toUpperCase()}
-                          </div>
+                            <div 
+                              className="user-avatar" 
+                              style={{ 
+                                width: 38, 
+                                height: 38, 
+                                fontSize: '0.9rem', 
+                                fontWeight: 800,
+                                color: '#ffffff',
+                                background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))', 
+                                flexShrink: 0,
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              {m.displayName[0].toUpperCase()}
+                            </div>
                           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.displayName}</span>
                             <span className={m.balance >= 0 ? 'balance-positive' : 'balance-negative'} style={{ fontWeight: 800, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
