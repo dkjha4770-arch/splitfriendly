@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -85,7 +85,7 @@ export const Dashboard = () => {
   }
 
   // Fetch Data (combined endpoint)
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/expenses/data', { headers: authHeaders });
@@ -104,13 +104,14 @@ export const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchData();
     }
-  }, [token]);
+  }, [token, fetchData]);
 
   // Filtered expenses for selected month
   const monthlyExpenses = expenses.filter(e => e.date.substring(0, 7) === selectedMonth);
@@ -131,34 +132,25 @@ export const Dashboard = () => {
   const totalVolume = activeExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const totalEntries = activeExpenses.length;
 
-  // Calculate Net Personal Balance (spent vs share in selected month)
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+
+  // Calculate Net Personal Balance (spent vs share in selected month)
   let totalSpent = 0;
   let totalShare = 0;
   const categoryTotals = {};
 
   monthlyExpenses.forEach(e => {
     const payer = e.payer.toLowerCase();
-    
-    // User is payer
-    if (payer === myHandle) {
-      totalSpent += Number(e.amount);
-    }
-    
-    // User share
+    if (payer === myHandle) totalSpent += Number(e.amount);
+
     let share = 0;
     if (e.members && typeof e.members === 'object' && !Array.isArray(e.members)) {
-      if (e.members[myHandle] !== undefined) {
-        share = Number(e.members[myHandle]);
-      }
+      if (e.members[myHandle] !== undefined) share = Number(e.members[myHandle]);
     } else if (Array.isArray(e.members)) {
-      if (e.members.map(m => m.toLowerCase()).includes(myHandle)) {
-        share = Number(e.share);
-      }
+      if (e.members.map(m => m.toLowerCase()).includes(myHandle)) share = Number(e.share);
     }
     totalShare += share;
 
-    // Chart category accumulations
     if (e.category !== 'settlement') {
       categoryTotals[e.category] = (categoryTotals[e.category] || 0) + Number(e.amount);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   TrendingUp, 
@@ -55,7 +55,7 @@ export const Analytics = () => {
   }
 
   // Fetch data
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/expenses/data', { headers: authHeaders });
@@ -69,13 +69,14 @@ export const Analytics = () => {
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchData();
     }
-  }, [token]);
+  }, [token, fetchData]);
 
   // Compute stats for current filters
   const filteredBySquad = expenses.filter(e => squadFilter === 'all' || e.squad_name === squadFilter);

@@ -123,7 +123,7 @@ export const Landing = () => {
           Financial management redefined. Experience the world's most beautiful expense tracker designed for modern teams.
         </p>
 
-        <div style={{
+        <div className="landing-btn-wrap" style={{
           display: 'flex',
           gap: '1.5rem',
           justifyContent: 'center',
@@ -187,7 +187,9 @@ export const Landing = () => {
                   gap: '0.75rem',
                   textDecoration: 'none',
                   boxShadow: 'var(--shadow)',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation'
                 }}
               >
                 <UserPlus size={18} />
@@ -205,10 +207,14 @@ export const Landing = () => {
                   alignItems: 'center',
                   gap: '0.75rem',
                   border: '1px solid var(--border-color)',
-                  background: 'var(--input-bg)',
+                  background: 'rgba(56, 189, 248, 0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
                   color: 'var(--text-color)',
                   textDecoration: 'none',
-                  transition: 'all 0.3s'
+                  transition: 'all 0.3s',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation'
                 }}
               >
                 <LogIn size={18} />
@@ -223,6 +229,17 @@ export const Landing = () => {
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-15px); }
+        }
+        /* Prevent square tap highlight on landing buttons */
+        .landing-btn-wrap a,
+        .landing-btn-wrap button {
+          -webkit-tap-highlight-color: transparent !important;
+          outline: none !important;
+        }
+        .landing-btn-wrap a:active,
+        .landing-btn-wrap button:active {
+          transform: scale(0.97) !important;
+          opacity: 0.9;
         }
       `}</style>
     </div>

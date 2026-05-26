@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   ShieldAlert, 
@@ -37,7 +37,7 @@ export const Admin = () => {
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
   // Fetch Users
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -54,11 +54,12 @@ export const Admin = () => {
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   // Trigger password reset
   const triggerReset = (u) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   Users, 
@@ -36,7 +36,7 @@ export const Squads = () => {
   const myUid = user?.unique_id || '';
 
   // Fetch squads and system users
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [squadsRes, usersRes] = await Promise.all([
@@ -57,13 +57,14 @@ export const Squads = () => {
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchData();
     }
-  }, [token]);
+  }, [token, fetchData]);
 
   // Form handler: Start creating a squad
   const startCreate = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -107,6 +107,7 @@ export const ExpenseForm = () => {
     if (token) {
       initData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   // Update members when squad selection changes
@@ -129,7 +130,7 @@ export const ExpenseForm = () => {
       });
       setQuantities(initialQtys);
     }
-  }, [selectedSquadName, squads]);
+  }, [selectedSquadName, squads, myHandle]);
 
   // Set default payer for Self Mode
   useEffect(() => {

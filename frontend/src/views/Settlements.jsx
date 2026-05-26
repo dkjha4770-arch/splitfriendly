@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   Calendar, 
@@ -48,7 +48,7 @@ export const Settlements = () => {
 
   const cycleStart = calculateCycleStart();
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/expenses/data', { headers: authHeaders });
@@ -62,13 +62,14 @@ export const Settlements = () => {
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchData();
     }
-  }, [token]);
+  }, [token, fetchData]);
 
   // Helper: check if a user is in expense members
   const hasMember = (mems, name) => {

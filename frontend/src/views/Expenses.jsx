@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -65,7 +65,7 @@ export const Expenses = () => {
   }
 
   // Fetch Expenses
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/expenses', { headers: authHeaders });
@@ -78,13 +78,14 @@ export const Expenses = () => {
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchExpenses();
     }
-  }, [token]);
+  }, [token, fetchExpenses]);
 
   // Handle Month Navigation
   const navigateMonth = (direction) => {
