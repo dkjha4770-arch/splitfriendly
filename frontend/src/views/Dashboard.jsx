@@ -380,21 +380,22 @@ export const Dashboard = () => {
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
-          
-          <select 
-            className="month-selector"
-            value={selectedMonth}
-            onChange={e => setSelectedMonth(e.target.value)}
-          >
-            {monthOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <div className="header-controls-group">
+            <select 
+              className="month-selector"
+              value={selectedMonth}
+              onChange={e => setSelectedMonth(e.target.value)}
+            >
+              {monthOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
 
-          <Link to="/expenses/new" className="btn-glass" style={{ textDecoration: 'none', background: 'var(--primary)', color: 'var(--btn-text-color)', border: 'none' }}>
-            <Plus size={16} />
-            <span>Launch Split</span>
-          </Link>
+            <Link to="/expenses/new" className="btn-glass" style={{ textDecoration: 'none', background: 'var(--primary)', color: 'var(--btn-text-color)', border: 'none' }}>
+              <Plus size={16} />
+              <span>Launch Split</span>
+            </Link>
+          </div>
         </div>
       </header>
 

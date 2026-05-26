@@ -420,6 +420,17 @@ body {
   align-items: center;
 }
 
+.header-controls-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.month-selector {
+  width: auto !important;
+  min-width: 140px;
+}
+
 /* Header Chip Elements */
 .search-bar,
 .month-selector,
@@ -1531,6 +1542,26 @@ tr {
     gap: 0.5rem;
   }
 
+  .header-controls-group {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    align-items: center;
+  }
+
+  .header-controls-group .month-selector {
+    flex: 1;
+    min-width: 110px;
+    width: auto !important;
+  }
+
+  .header-controls-group .btn-glass,
+  .header-controls-group .btn-primary {
+    flex: 1;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
   /* === SEARCH BAR === */
   .search-bar {
     width: 100%;
@@ -1963,6 +1994,12 @@ tr {
 
   .ledger-full {
     grid-template-columns: 1fr !important;
+  }
+
+  .header-controls-group .btn-glass,
+  .header-controls-group .btn-primary {
+    padding: 0.65rem 0.5rem;
+    font-size: 0.78rem;
   }
 
 }
