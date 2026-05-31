@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { KeyRound, User, Lock, AlertCircle } from 'lucide-react';
@@ -10,6 +10,13 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Send a request to wake/pre-warm database connection pool in the background
+    fetch('/api/auth/wake').catch(err => {
+      console.warn('Background database pre-warm failed/timed out:', err);
+    });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -145,7 +152,7 @@ export const Login = () => {
             ) : (
               <>
                 <KeyRound size={16} />
-                <span>Initialize Session</span>
+                <span>Login</span>
               </>
             )}
           </button>

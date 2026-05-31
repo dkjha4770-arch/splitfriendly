@@ -16,6 +16,9 @@ export const Register = () => {
 
   // Fetch count of users to estimate serial
   useEffect(() => {
+    // Pre-warm the database connection in the background
+    fetch('/api/auth/wake').catch(() => {});
+
     const fetchUserCount = async () => {
       try {
         const res = await fetch('/api/auth/profile'); // Just a probe to see if server is online, or fetch list

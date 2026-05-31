@@ -206,7 +206,7 @@ export const Analytics = () => {
           label: 'Operational Spend (INR)',
           data: trendData,
           borderColor: '#0ea5e9',
-          backgroundColor: 'rgba(14, 165, 233, 0.1)',
+          backgroundColor: 'rgba(56, 189, 248, 0.1)',
           fill: true,
           tension: 0.4,
           borderWidth: 3,

@@ -64,22 +64,40 @@ router.get('/data', authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const username = req.user.username;
 
-  try {
-    const aliasMap = await getAliasMap();
+  // Acquire a single client from the pool to run all queries sequentially.
+  // This avoids parallel connection handshake overhead and prevents connection timeouts on Neon.
+  const client = await db.pool.connect();
 
-    // Fetch user details for self checks
-    const meRows = await db.query('SELECT unique_id FROM users WHERE id = ?', [userId]);
-    const myUniqueId = (meRows[0]?.unique_id || '').toLowerCase();
+  try {
+    const allUsersRows = await client.query('SELECT username, display_name, avatar_color, unique_id FROM users');
+    const rawExpensesRows = await client.query('SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name FROM expenses ORDER BY date DESC, id DESC');
+    const rawSquadsRows = await client.query('SELECT s.id, s.name, s.creator_id, s.members, u.username as creator FROM squads s JOIN users u ON s.creator_id = u.id');
+
+    const allUsers = allUsersRows.rows;
+    const rawExpenses = rawExpensesRows.rows;
+    const rawSquads = rawSquadsRows.rows;
+
+    const me = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
+    const myUniqueId = (me?.unique_id || req.user.unique_id || '').toLowerCase();
     const myHandle = username.split('@')[0].toLowerCase();
 
-    // Fetch expenses
-    const rawExpenses = await db.query(
-      'SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name FROM expenses ORDER BY date DESC, id DESC'
-    );
+    // Build aliasMap from allUsers
+    const aliasMap = {};
+    for (const u of allUsers) {
+      if (u.unique_id) {
+        const handle = u.username.split('@')[0].toLowerCase();
+        const uid = u.unique_id;
+        const parts = uid.split('-');
+        const sfx = parts[parts.length - 1].toLowerCase();
+        if (sfx) aliasMap[sfx] = handle;
+        aliasMap[uid.toLowerCase()] = handle;
+        aliasMap[u.username.toLowerCase()] = handle;
+      }
+    }
+
     const expenses = rawExpenses.map(exp => processExpenseAliases(exp, aliasMap));
 
     // Fetch all users to construct an avatar and displayName mapping
-    const allUsers = await db.query('SELECT username, display_name, avatar_color, unique_id FROM users');
     const userMap = {};
     const userProfiles = allUsers.map(u => {
       const handle = u.username.split('@')[0].toLowerCase();
@@ -99,11 +117,6 @@ router.get('/data', authMiddleware, async (req, res) => {
         unique_id: u.unique_id
       };
     });
-
-    // Fetch squads
-    const rawSquads = await db.query(
-      'SELECT s.id, s.name, s.creator_id, s.members, u.username as creator FROM squads s JOIN users u ON s.creator_id = u.id'
-    );
 
     const mySquads = [];
     for (const s of rawSquads) {
@@ -154,6 +167,8 @@ router.get('/data', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Error fetching data:', err);
     return res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
   }
 });
 

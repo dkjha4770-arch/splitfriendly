@@ -207,7 +207,7 @@ export const Landing = () => {
                   alignItems: 'center',
                   gap: '0.75rem',
                   border: '1px solid var(--border-color)',
-                  background: 'rgba(56, 189, 248, 0.08)',
+                  background: 'rgba(var(--primary-rgb), 0.08)',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)',
                   color: 'var(--text-color)',

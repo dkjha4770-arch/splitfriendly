@@ -1,31 +1,35 @@
 :root {
   --primary: #38bdf8;
   --primary-hover: #7dd3fc;
-  --btn-text-color: #080e1a;
+  --primary-rgb: 56, 189, 248;
+  --btn-text-color: #040d1a;
   --secondary: #0ea5e9;
-  --bg-color: #080e1a;
-  --sidebar-bg: #0c1527;
-  --card-bg: rgba(13, 22, 41, 0.65);
-  --border-color: rgba(56, 189, 248, 0.15);
+  --secondary-rgb: 14, 165, 233;
+  --bg-color: #030712;
+  --sidebar-bg: #0b1329;
+  --card-bg: rgba(11, 19, 41, 0.65);
+  --border-color: rgba(56, 189, 248, 0.12);
   --text-color: #f0f9ff;
   --text-dim: #94a3b8;
-  --glass-bg: rgba(13, 22, 41, 0.7);
-  --glass-border: rgba(56, 189, 248, 0.2);
-  --shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(11, 19, 41, 0.7);
+  --glass-border: rgba(56, 189, 248, 0.18);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
   --clay-shadow: 0 8px 32px rgba(14, 165, 233, 0.08);
-  --input-bg: #050a14;
-  --gradient-bg: radial-gradient(circle at 50% 50%, #0d1e3a 0%, #040710 100%);
+  --input-bg: #030712;
+  --gradient-bg: radial-gradient(circle at 50% 50%, #0d1e3d 0%, #030712 100%);
   --sidebar-width: 250px;
 }
 
 [data-theme="light"] {
   --primary: #0284c7;
   --primary-hover: #0369a1;
+  --primary-rgb: 2, 132, 199;
   --btn-text-color: #ffffff;
   --secondary: #0ea5e9;
+  --secondary-rgb: 14, 165, 233;
   --bg-color: #f0f9ff;
   --sidebar-bg: #ffffff;
-  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-bg: rgba(255, 255, 255, 0.75);
   --border-color: rgba(2, 132, 199, 0.15);
   --text-color: #0f172a;
   --text-dim: #475569;
@@ -33,7 +37,7 @@
   --glass-border: rgba(2, 132, 199, 0.15);
   --shadow: 0 8px 32px rgba(2, 132, 199, 0.06);
   --clay-shadow: 0 8px 32px rgba(2, 132, 199, 0.04);
-  --input-bg: #f1f5f9;
+  --input-bg: #e0f2fe;
   --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
 }
 
@@ -257,7 +261,7 @@ body {
 
 .nav-item:hover:not(.active) {
   color: var(--text-color) !important;
-  background: rgba(56, 189, 248, 0.08);
+  background: rgba(var(--primary-rgb), 0.08);
   transform: translateX(4px);
 }
 
@@ -332,7 +336,7 @@ body {
   font-size: 1.1rem;
   font-weight: 800;
   color: var(--btn-text-color);
-  box-shadow: 0 5px 20px rgba(56, 189, 248, 0.4);
+  box-shadow: 0 5px 20px rgba(var(--primary-rgb), 0.4);
   position: relative;
   border: none;
 }
@@ -460,9 +464,9 @@ body {
 }
 
 .search-bar:focus-within {
-  background: rgba(56, 189, 248, 0.08) !important;
+  background: rgba(var(--primary-rgb), 0.08) !important;
   border-color: var(--primary) !important;
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 0 25px rgba(var(--primary-rgb), 0.2);
 }
 
 .month-selector,
@@ -503,8 +507,8 @@ body {
 
 .card:hover {
   transform: translateY(-5px);
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 15px 35px rgba(14, 165, 233, 0.12);
+  border-color: rgba(var(--primary-rgb), 0.35);
+  box-shadow: 0 15px 35px rgba(var(--secondary-rgb), 0.12);
 }
 
 
@@ -652,7 +656,7 @@ textarea:focus {
 .btn-primary:hover {
   background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.3);
+  box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.3);
 }
 
 .btn-primary:active {
@@ -1092,7 +1096,7 @@ tr {
   background: var(--primary);
   color: var(--btn-text-color);
   border-color: var(--primary);
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.25);
 }
 
 /* Admin / Command Centre scoped styling overrides */
@@ -2038,5 +2042,12 @@ tr {
   .protocol-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+}
+
+/* Global spin animation keyframes */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

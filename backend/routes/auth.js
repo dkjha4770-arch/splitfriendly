@@ -70,6 +70,17 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Database wake-up / pre-warm endpoint
+router.get('/wake', async (req, res) => {
+  try {
+    await db.query('SELECT 1');
+    return res.json({ success: true, status: 'warmed' });
+  } catch (err) {
+    console.error('Database warming error:', err);
+    return res.status(500).json({ error: 'Failed to warm database connection.' });
+  }
+});
+
 // Login Endpoint
 router.post('/login', async (req, res) => {
   let { username, password } = req.body;

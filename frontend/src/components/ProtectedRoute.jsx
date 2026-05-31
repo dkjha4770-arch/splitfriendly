@@ -21,7 +21,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }) => {
             width: '40px',
             height: '40px',
             border: '4px solid rgba(255,255,255,0.1)',
-            borderTop: '4px solid #38bdf8',
+            borderTop: '4px solid var(--primary)',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 1.5rem auto'

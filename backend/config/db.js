@@ -1,3 +1,7 @@
+const dns = require('dns');
+// Set DNS resolution order to prefer IPv4 first (speeds up Windows/Node.js remote database handshakes)
+dns.setDefaultResultOrder('ipv4first');
+
 const { Pool } = require('pg');
 require('dotenv').config();
 
@@ -6,7 +10,10 @@ const dbConfig = {
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false // Required for Neon secure connection
-  }
+  },
+  max: 20, // Increase connection pool size
+  idleTimeoutMillis: 30000, // Keep idle connections open for 30s to avoid frequent reconnection overhead
+  connectionTimeoutMillis: 15000, // Timeout after 15s to allow Neon cold starts to complete
 };
 
 let pool;
