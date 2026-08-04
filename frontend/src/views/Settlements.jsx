@@ -12,7 +12,9 @@ import {
   TrendingUp,
   History,
   Shield,
-  Activity
+  Activity,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 
 export const Settlements = () => {
@@ -56,6 +58,14 @@ export const Settlements = () => {
     amount: 0,
     heOwesMe: false
   });
+
+  // Batch Settle Modal state
+  const [batchModal, setBatchModal] = useState({
+    isOpen: false,
+    items: [],
+    selected: {}
+  });
+  const [batchLoading, setBatchLoading] = useState(false);
 
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
 
@@ -293,6 +303,89 @@ export const Settlements = () => {
     }
   };
 
+  // Collect all outstanding balances for the batch modal
+  const openBatchSettle = () => {
+    const allItems = [];
+
+    // Squad balances
+    squads.forEach(s => {
+      const { members } = computeSquadBalances(s.name);
+      members.filter(m => Math.abs(m.balance) > 0.01).forEach(m => {
+        allItems.push({
+          key: `${s.name}::${m.username}`,
+          squadName: s.name,
+          username: m.username,
+          displayName: m.displayName,
+          balance: m.balance,
+          avatarColor: m.avatarColor
+        });
+      });
+    });
+
+    // Solo balances
+    const solo = computeSoloBalances();
+    solo.members.forEach(m => {
+      allItems.push({
+        key: `solo::${m.username}`,
+        squadName: null,
+        username: m.username,
+        displayName: m.displayName,
+        balance: m.balance,
+        avatarColor: m.avatarColor
+      });
+    });
+
+    if (allItems.length === 0) {
+      alert('No outstanding balances to settle in this month.');
+      return;
+    }
+
+    // Pre-select all
+    const selected = {};
+    allItems.forEach(item => { selected[item.key] = true; });
+    setBatchModal({ isOpen: true, items: allItems, selected });
+  };
+
+  const executeBatchSettle = async () => {
+    const { items, selected } = batchModal;
+    const toSettle = items.filter(item => selected[item.key]);
+    if (toSettle.length === 0) {
+      alert('Select at least one balance to settle.');
+      return;
+    }
+    setBatchLoading(true);
+    try {
+      for (const item of toSettle) {
+        const { squadName, username, balance } = item;
+        const heOwesMe = balance > 0;
+        const body = {
+          date: new Date().toISOString().split('T')[0],
+          amount: Math.abs(balance),
+          payer: heOwesMe ? username : myHandle,
+          share: Math.abs(balance),
+          where: heOwesMe ? `Received settlement from ${username}` : `Paid settlement to ${username}`,
+          category: 'settlement',
+          app: 'upi',
+          members: [heOwesMe ? myHandle : username],
+          squad_name: squadName || null
+        };
+        const res = await fetch('/api/expenses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Settlement failed.');
+      }
+      setBatchModal({ isOpen: false, items: [], selected: {} });
+      fetchData();
+    } catch (err) {
+      alert('Batch settlement failed: ' + err.message);
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', height: '80vh', alignItems: 'center', justifyContent: 'center' }}>
@@ -318,7 +411,7 @@ export const Settlements = () => {
           </p>
         </div>
 
-        {/* Month + Squad Selection */}
+        {/* Month + Squad Selection + Batch Settle */}
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Month Picker */}
           <select
@@ -362,6 +455,31 @@ export const Settlements = () => {
               <option key={s.id || s.name} value={s.name}>{s.name} Squadron</option>
             ))}
           </select>
+
+          {/* Batch Settle Button */}
+          <button
+            onClick={openBatchSettle}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              border: '1px solid var(--primary)',
+              background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+              color: '#fff',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+              transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
+            <CheckSquare size={16} />
+            Settle Selected
+          </button>
         </div>
       </div>
 
@@ -875,6 +993,164 @@ export const Settlements = () => {
                 >
                   Cancel
                 </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {/* Batch Settle Modal */}
+      {batchModal.isOpen && (
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => !batchLoading && setBatchModal(prev => ({ ...prev, isOpen: false }))}>
+            <div
+              className="modal-content"
+              onClick={e => e.stopPropagation()}
+              style={{ maxWidth: '520px', width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+            >
+              {/* Modal Header */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CheckSquare size={20} style={{ color: 'var(--primary)' }} />
+                  Settle Selected Balances
+                </h3>
+                <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '0.4rem' }}>
+                  Choose which balances to settle for <strong>{selectedMonth}</strong>. Each selected item will be recorded as a settlement.
+                </p>
+              </div>
+
+              {/* Select All / Deselect All */}
+              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+                <button
+                  onClick={() => {
+                    const all = {};
+                    batchModal.items.forEach(i => { all[i.key] = true; });
+                    setBatchModal(prev => ({ ...prev, selected: all }));
+                  }}
+                  style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.3rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', cursor: 'pointer' }}
+                >
+                  Select All
+                </button>
+                <button
+                  onClick={() => setBatchModal(prev => ({ ...prev, selected: {} }))}
+                  style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.3rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', cursor: 'pointer' }}
+                >
+                  Deselect All
+                </button>
+                <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--text-dim)', alignSelf: 'center' }}>
+                  {Object.values(batchModal.selected).filter(Boolean).length} / {batchModal.items.length} selected
+                </span>
+              </div>
+
+              {/* Balance List */}
+              <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.6rem', paddingRight: '0.25rem' }}>
+                {batchModal.items.map(item => {
+                  const isChecked = !!batchModal.selected[item.key];
+                  const isOwed = item.balance > 0;
+                  return (
+                    <div
+                      key={item.key}
+                      onClick={() => setBatchModal(prev => ({
+                        ...prev,
+                        selected: { ...prev.selected, [item.key]: !prev.selected[item.key] }
+                      }))}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        padding: '0.8rem 1rem',
+                        borderRadius: '12px',
+                        border: `1px solid ${isChecked ? (isOwed ? '#10b98140' : '#f59e0b40') : 'var(--border-color)'}`,
+                        background: isChecked ? (isOwed ? 'rgba(16,185,129,0.06)' : 'rgba(245,158,11,0.06)') : 'var(--input-bg)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        userSelect: 'none'
+                      }}
+                    >
+                      {/* Checkbox icon */}
+                      <div style={{ flexShrink: 0, color: isChecked ? (isOwed ? '#10b981' : '#f59e0b') : 'var(--text-dim)' }}>
+                        {isChecked ? <CheckSquare size={18} /> : <Square size={18} />}
+                      </div>
+
+                      {/* Avatar */}
+                      <div
+                        style={{
+                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                          background: item.avatarColor ? `linear-gradient(${item.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 800, fontSize: '0.85rem', color: '#fff'
+                        }}
+                      >
+                        {item.displayName[0].toUpperCase()}
+                      </div>
+
+                      {/* Name + context */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.displayName}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.1rem' }}>
+                          {item.squadName ? `${item.squadName} Squadron` : 'Direct / Solo'}
+                        </div>
+                      </div>
+
+                      {/* Amount + direction */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
+                        <span
+                          style={{
+                            fontWeight: 800, fontSize: '1rem',
+                            color: isOwed ? '#10b981' : '#f59e0b'
+                          }}
+                        >
+                          {isOwed ? '+' : '-'}₹{Math.abs(item.balance).toFixed(2)}
+                        </span>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '0.1rem' }}>
+                          {isOwed ? 'they owe you' : 'you owe them'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Total + Actions */}
+              <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                  <span style={{ color: 'var(--text-dim)', fontWeight: 600 }}>Total Settlement Amount</span>
+                  <span style={{ fontWeight: 900, fontSize: '1.1rem' }}>
+                    ₹{batchModal.items
+                      .filter(i => batchModal.selected[i.key])
+                      .reduce((sum, i) => sum + Math.abs(i.balance), 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button
+                    onClick={() => setBatchModal(prev => ({ ...prev, isOpen: false }))}
+                    disabled={batchLoading}
+                    className="btn-glass"
+                    style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', fontWeight: 700, border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={executeBatchSettle}
+                    disabled={batchLoading || Object.values(batchModal.selected).filter(Boolean).length === 0}
+                    className="btn-primary"
+                    style={{
+                      flex: 2, padding: '0.75rem', borderRadius: '12px', fontWeight: 700,
+                      background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                      color: '#fff', cursor: 'pointer', opacity: batchLoading ? 0.7 : 1,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                    }}
+                  >
+                    {batchLoading ? (
+                      <><div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Processing...</>
+                    ) : (
+                      <><CheckSquare size={16} /> Confirm & Settle</>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
