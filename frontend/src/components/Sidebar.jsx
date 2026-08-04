@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
@@ -23,6 +23,14 @@ import {
 export const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout, theme, toggleTheme } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Auto-close sidebar on mobile whenever route/location changes
+  useEffect(() => {
+    if (isOpen && onClose) {
+      onClose();
+    }
+  }, [location.pathname, location.search]);
   
   if (!user) return null;
 
@@ -41,10 +49,16 @@ export const Sidebar = ({ isOpen, onClose }) => {
     return location.pathname === '/expenses/new' && params.get('mode') === mode;
   };
 
+  const handleOptionClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
 
-      <Link to="/dashboard" className="sidebar-logo" onClick={onClose}>
+      <Link to="/dashboard" className="sidebar-logo" onClick={handleOptionClick}>
         <div className="logo-badge"><Wallet size={20} /></div>
         <h1>Split<span>Friendly</span></h1>
       </Link>
@@ -54,7 +68,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           to="/" 
           end
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <Globe />
           <span>Welcome Page</span>
@@ -63,7 +77,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         <NavLink 
           to="/dashboard" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <LayoutDashboard />
           <span>Dashboard</span>
@@ -72,7 +86,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         <NavLink 
           to="/expenses/new" 
           className={({ isActive }) => `nav-item ${isActive || location.pathname.startsWith('/expenses/new') ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <PlusCircle />
           <span>Split Expense</span>
@@ -81,7 +95,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         <NavLink 
           to="/expenses" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <Receipt />
           <span>Expenses Ledger</span>
@@ -90,7 +104,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         <NavLink 
           to="/squads" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <Users />
           <span>Squads</span>
@@ -99,7 +113,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         <NavLink 
           to="/settlements" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <ArrowLeftRight />
           <span>Settlements</span>
@@ -108,7 +122,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         <NavLink 
           to="/analytics" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <TrendingUp />
           <span>Analytics</span>
@@ -118,7 +132,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           <NavLink 
             to="/admin" 
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-            onClick={onClose}
+            onClick={handleOptionClick}
           >
             <Terminal />
             <span>Command Centre</span>
@@ -128,7 +142,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         <NavLink 
           to="/profile" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
+          onClick={handleOptionClick}
         >
           <User />
           <span>Settings & Profile</span>
@@ -138,6 +152,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           href={`${import.meta.env.VITE_API_URL || ''}/api/expenses/export`} 
           className="nav-item"
           style={{ textDecoration: 'none' }}
+          onClick={handleOptionClick}
         >
           <Download />
           <span>Export CSV</span>
@@ -145,17 +160,29 @@ export const Sidebar = ({ isOpen, onClose }) => {
       </nav>
 
       <div className="sidebar-footer">
-        <button className="nav-item" onClick={toggleTheme}>
+        <button 
+          className="nav-item" 
+          onClick={() => {
+            toggleTheme();
+            handleOptionClick();
+          }}
+        >
           {theme === 'dark' ? <Sun /> : <Moon />}
           <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
         </button>
 
-        <button className="nav-item" onClick={logout}>
+        <button 
+          className="nav-item" 
+          onClick={() => {
+            logout();
+            handleOptionClick();
+          }}
+        >
           <LogOut />
           <span>Logout</span>
         </button>
 
-        <div className="user-profile" onClick={onClose}>
+        <div className="user-profile" onClick={() => { navigate('/profile'); handleOptionClick(); }}>
           <div className="user-avatar" style={avatarStyle}>
             {handle.charAt(0).toUpperCase()}
           </div>
