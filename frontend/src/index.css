@@ -254,9 +254,9 @@ body {
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-radius: 14px;
-  color: var(--text-dim);
+  color: var(--text-color) !important;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 0.95rem;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
@@ -269,8 +269,8 @@ body {
 }
 
 .nav-item:hover:not(.active) {
-  color: var(--text-color) !important;
-  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary) !important;
+  background: rgba(var(--primary-rgb), 0.15);
 }
 
 .nav-item i,
@@ -279,6 +279,7 @@ body {
   height: 18px;
   transition: all 0.4s ease;
   flex-shrink: 0;
+  color: inherit;
 }
 
 
@@ -365,7 +366,7 @@ body {
 
 .user-info .name {
   display: block;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1rem;
   color: var(--text-color);
   white-space: nowrap;
@@ -376,7 +377,8 @@ body {
 
 .user-info .role {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--text-dim);
 }
 
@@ -423,7 +425,7 @@ body {
 .header-title p {
   color: var(--text-dim);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .header-actions {
@@ -570,13 +572,15 @@ body {
   display: block;
   font-size: 0.85rem;
   color: var(--text-dim);
+  font-weight: 700;
   margin-bottom: 0.2rem;
 }
 
 .stat-value {
   display: block;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 900;
+  color: var(--text-color);
 }
 
 /* Forms */
@@ -586,10 +590,10 @@ body {
 
 .form-group label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 700;
   margin-bottom: 0.5rem;
-  color: var(--text-dim);
+  color: var(--text-color);
 }
 
 input,
@@ -787,8 +791,8 @@ th {
   text-align: left;
   padding: 0.75rem 1rem;
   color: var(--text-dim);
-  font-weight: 500;
-  font-size: 0.8rem;
+  font-weight: 800;
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -796,8 +800,10 @@ th {
 td {
   padding: 1.25rem 1rem;
   background: rgba(255, 255, 255, 0.02);
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
+  border-top: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-color) !important;
+  font-weight: 600;
   transition: all 0.3s ease;
 }
 
