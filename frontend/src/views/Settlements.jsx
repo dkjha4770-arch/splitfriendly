@@ -471,11 +471,8 @@ export const Settlements = () => {
               border: '1px solid var(--primary)',
               background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
               color: '#fff',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-              transition: 'opacity 0.2s'
+              boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
             <CheckSquare size={16} />
             Settle Selected

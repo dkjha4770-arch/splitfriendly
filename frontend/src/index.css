@@ -1,51 +1,51 @@
 :root {
-  --primary: #38bdf8;
-  --primary-hover: #818cf8;
-  --primary-rgb: 56, 189, 248;
-  --btn-text-color: #030712;
-  --secondary: #c084fc;
-  --secondary-rgb: 192, 132, 252;
-  --accent-glow: #6366f1;
-  --bg-color: #050b18;
-  --sidebar-bg: rgba(13, 22, 45, 0.55);
-  --card-bg: rgba(15, 25, 52, 0.45);
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-rgb: 16, 185, 129;
+  --btn-text-color: #ffffff;
+  --secondary: #6366f1;
+  --secondary-rgb: 99, 102, 241;
+  --accent-glow: #0ea5e9;
+  --bg-color: #0b0f19;
+  --sidebar-bg: rgba(15, 23, 42, 0.7);
+  --card-bg: rgba(18, 26, 45, 0.55);
   --border-color: rgba(255, 255, 255, 0.12);
   --text-color: #f8fafc;
   --text-dim: #94a3b8;
-  --glass-bg: rgba(15, 25, 52, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  --clay-shadow: 0 12px 35px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  --input-bg: rgba(9, 16, 36, 0.65);
-  --gradient-bg: radial-gradient(at 15% 15%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
-                 radial-gradient(at 85% 20%, rgba(192, 132, 252, 0.15) 0px, transparent 50%),
-                 radial-gradient(at 50% 80%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-                 #050b18;
+  --glass-bg: rgba(18, 26, 45, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --shadow: 0 12px 35px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --clay-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --input-bg: rgba(11, 17, 31, 0.7);
+  --gradient-bg: radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.12) 0px, transparent 45%),
+                 radial-gradient(at 85% 20%, rgba(99, 102, 241, 0.12) 0px, transparent 45%),
+                 radial-gradient(at 50% 85%, rgba(14, 165, 233, 0.1) 0px, transparent 45%),
+                 #0b0f19;
   --sidebar-width: 250px;
 }
 
 [data-theme="light"] {
-  --primary: #0284c7;
-  --primary-hover: #4f46e5;
-  --primary-rgb: 2, 132, 199;
+  --primary: #059669;
+  --primary-hover: #047857;
+  --primary-rgb: 5, 150, 105;
   --btn-text-color: #ffffff;
-  --secondary: #9333ea;
-  --secondary-rgb: 147, 51, 234;
-  --accent-glow: #6366f1;
+  --secondary: #4f46e5;
+  --secondary-rgb: 79, 70, 229;
+  --accent-glow: #0284c7;
   --bg-color: #f8fafc;
-  --sidebar-bg: rgba(255, 255, 255, 0.65);
-  --card-bg: rgba(255, 255, 255, 0.55);
-  --border-color: rgba(255, 255, 255, 0.6);
+  --sidebar-bg: rgba(255, 255, 255, 0.85);
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --border-color: rgba(226, 232, 240, 0.8);
   --text-color: #0f172a;
   --text-dim: #64748b;
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.8);
-  --shadow: 0 16px 40px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --clay-shadow: 0 12px 35px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  --input-bg: rgba(241, 245, 249, 0.7);
-  --gradient-bg: radial-gradient(at 10% 10%, rgba(56, 189, 248, 0.18) 0px, transparent 50%),
-                 radial-gradient(at 90% 15%, rgba(192, 132, 252, 0.15) 0px, transparent 50%),
-                 radial-gradient(at 50% 85%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --shadow: 0 12px 30px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --clay-shadow: 0 8px 25px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --input-bg: rgba(241, 245, 249, 0.85);
+  --gradient-bg: radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.12) 0px, transparent 45%),
+                 radial-gradient(at 90% 15%, rgba(99, 102, 241, 0.1) 0px, transparent 45%),
+                 radial-gradient(at 50% 85%, rgba(14, 165, 233, 0.08) 0px, transparent 45%),
                  #f8fafc;
 }
 
@@ -271,8 +271,7 @@ body {
 
 .nav-item:hover:not(.active) {
   color: var(--text-color) !important;
-  background: rgba(var(--primary-rgb), 0.08);
-  transform: translateX(4px);
+  background: rgba(var(--primary-rgb), 0.12);
 }
 
 .nav-item i,
@@ -520,9 +519,7 @@ body {
 }
 
 .card:hover {
-  transform: translateY(-5px);
   border-color: rgba(var(--primary-rgb), 0.35);
-  box-shadow: 0 15px 35px rgba(var(--secondary-rgb), 0.12);
 }
 
 
@@ -549,9 +546,7 @@ body {
 }
 
 .stat-card:hover {
-  transform: translateY(-3px);
   border-color: var(--primary);
-  box-shadow: 0 15px 35px rgba(var(--primary-rgb), 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .stat-icon {
@@ -683,19 +678,16 @@ textarea:focus {
 }
 
 .btn-primary:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 12px 30px rgba(var(--primary-rgb), 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: var(--primary-hover);
 }
 
 .btn-primary:active {
-  transform: translateY(-1px) scale(0.99);
+  opacity: 0.9;
 }
 
 .btn-glass:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-color: var(--primary);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .btn-glass:active {
@@ -2043,17 +2035,15 @@ tr {
 
 /* Choice screen selection cards */
 .select-card {
-  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  transition: border-color 0.2s ease !important;
 }
 
 .select-card:hover {
-  transform: translateY(-8px) scale(1.02) !important;
   border-color: var(--primary) !important;
-  box-shadow: 0 20px 40px rgba(14, 165, 233, 0.15) !important;
 }
 
 .select-card:active {
-  transform: translateY(-4px) scale(1.0) !important;
+  opacity: 0.9;
 }
 
 .protocol-grid {
@@ -2083,4 +2073,9 @@ tr {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Explicitly disable all hover movements and element translations */
+*:hover {
+  transform: none !important;
 }
