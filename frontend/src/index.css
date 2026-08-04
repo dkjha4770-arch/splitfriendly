@@ -9,11 +9,11 @@
   --bg-color: #a5c4f7;
   --sidebar-bg: rgba(255, 255, 255, 0.88);
   --card-bg: rgba(255, 255, 255, 0.92);
-  --border-color: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(148, 163, 184, 0.45);
   --text-color: #1e293b;
   --text-dim: #64748b;
   --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(148, 163, 184, 0.5);
   --shadow: 14px 14px 28px rgba(145, 175, 225, 0.35), -12px -12px 24px rgba(255, 255, 255, 0.9), inset 3px 3px 6px rgba(255, 255, 255, 0.9), inset -3px -3px 6px rgba(165, 195, 245, 0.25);
   --clay-shadow: 10px 10px 20px rgba(145, 175, 225, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
   --input-bg: rgba(241, 245, 249, 0.85);
@@ -36,11 +36,11 @@
   --bg-color: #a5c4f7;
   --sidebar-bg: rgba(255, 255, 255, 0.88);
   --card-bg: rgba(255, 255, 255, 0.92);
-  --border-color: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(148, 163, 184, 0.45);
   --text-color: #1e293b;
   --text-dim: #64748b;
   --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(148, 163, 184, 0.5);
   --shadow: 14px 14px 28px rgba(145, 175, 225, 0.35), -12px -12px 24px rgba(255, 255, 255, 0.9), inset 3px 3px 6px rgba(255, 255, 255, 0.9), inset -3px -3px 6px rgba(165, 195, 245, 0.25);
   --clay-shadow: 10px 10px 20px rgba(145, 175, 225, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
   --input-bg: rgba(241, 245, 249, 0.85);
@@ -157,7 +157,7 @@ body {
 .sidebar {
   width: 250px;
   background: var(--sidebar-bg);
-  border: 1px solid var(--border-color);
+  border: 2px solid rgba(148, 163, 184, 0.45);
   border-radius: 32px;
   display: flex;
   flex-direction: column;
@@ -288,7 +288,7 @@ body {
 .nav-item.active {
   color: #ffffff !important;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid #1d4ed8;
   border-radius: 50px;
   box-shadow: 6px 6px 14px rgba(59, 130, 246, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(29, 78, 216, 0.3);
 }
@@ -390,7 +390,7 @@ body {
   max-width: 100%;
   margin: 20px 20px 20px calc(var(--sidebar-width) + 40px);
   background: var(--glass-bg);
-  border: 1px solid var(--border-color);
+  border: 2px solid rgba(148, 163, 184, 0.45);
   border-radius: 35px;
   padding: 2.5rem;
   height: calc(100vh - 40px);
@@ -451,7 +451,7 @@ body {
 .month-selector,
 .theme-select {
   background: rgba(241, 245, 249, 0.9) !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid rgba(148, 163, 184, 0.5) !important;
   border-radius: 50px !important;
   box-shadow: 4px 4px 12px rgba(145, 175, 225, 0.25), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2) !important;
   transition: all 0.3s ease;
@@ -506,7 +506,7 @@ body {
 
 .card {
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: 2px solid rgba(148, 163, 184, 0.45);
   border-radius: 35px;
   padding: 1.75rem;
   box-shadow: var(--shadow);
@@ -536,7 +536,7 @@ body {
   background: #ffffff;
   border-radius: 28px;
   padding: 1.2rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(148, 163, 184, 0.45);
   box-shadow: 10px 10px 20px rgba(145, 175, 225, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.9), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
   transition: all 0.35s ease;
 }
@@ -634,7 +634,7 @@ textarea:focus {
   color: #ffffff;
   padding: 0.85rem 1.6rem;
   border-radius: 50px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid #1d4ed8;
   font-weight: 800;
   cursor: pointer;
   box-shadow: 6px 6px 16px rgba(59, 130, 246, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(29, 78, 216, 0.3);
@@ -652,7 +652,7 @@ textarea:focus {
 
 .btn-glass {
   background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(148, 163, 184, 0.6);
   color: #1e293b;
   padding: 0.8rem 1.4rem;
   border-radius: 50px;
@@ -693,7 +693,7 @@ textarea:focus {
   border-radius: 20px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  border: 1px solid var(--border-color);
+  border: 2px solid rgba(148, 163, 184, 0.45);
 }
 
 .personal-summary h3 {
@@ -730,7 +730,7 @@ textarea:focus {
   padding: 1.25rem;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 20px;
-  border: 1px solid var(--border-color);
+  border: 2px solid rgba(148, 163, 184, 0.4);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
@@ -876,7 +876,7 @@ tr {
 
 .modal-content {
   background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(148, 163, 184, 0.6);
   border-radius: 35px;
   width: 90%;
   max-width: 500px;
