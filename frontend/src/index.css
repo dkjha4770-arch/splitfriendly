@@ -1,53 +1,51 @@
 :root {
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --primary-rgb: 59, 130, 246;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-rgb: 99, 102, 241;
   --btn-text-color: #ffffff;
   --secondary: #22c55e;
   --secondary-rgb: 34, 197, 94;
-  --accent-glow: #60a5fa;
-  --bg-color: #a5c4f7;
-  --sidebar-bg: rgba(255, 255, 255, 0.88);
-  --card-bg: rgba(255, 255, 255, 0.92);
-  --border-color: rgba(148, 163, 184, 0.45);
-  --text-color: #1e293b;
-  --text-dim: #64748b;
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(148, 163, 184, 0.5);
-  --shadow: 14px 14px 28px rgba(145, 175, 225, 0.35), -12px -12px 24px rgba(255, 255, 255, 0.9), inset 3px 3px 6px rgba(255, 255, 255, 0.9), inset -3px -3px 6px rgba(165, 195, 245, 0.25);
-  --clay-shadow: 10px 10px 20px rgba(145, 175, 225, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
-  --input-bg: rgba(241, 245, 249, 0.85);
+  --accent-glow: #38bdf8;
+  --bg-color: #0b092b;
+  --sidebar-bg: rgba(26, 23, 68, 0.85);
+  --card-bg: rgba(26, 23, 68, 0.8);
+  --border-color: rgba(165, 180, 252, 0.35);
+  --text-color: #f8fafc;
+  --text-dim: #94a3b8;
+  --glass-bg: rgba(26, 23, 68, 0.82);
+  --glass-border: rgba(165, 180, 252, 0.35);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --clay-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(15, 12, 43, 0.85);
   --gradient-bg: 
-    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 0px, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(165, 196, 247, 0.6) 0px, transparent 50%),
-    radial-gradient(circle at 50% 10%, rgba(195, 218, 254, 0.7) 0px, transparent 45%),
-    linear-gradient(135deg, #a5c4f7 0%, #cbdcfd 50%, #e2ecfe 100%);
+    radial-gradient(circle at 85% 15%, rgba(124, 58, 237, 0.4) 0px, transparent 45%),
+    radial-gradient(circle at 15% 85%, rgba(56, 189, 248, 0.25) 0px, transparent 40%),
+    linear-gradient(135deg, #0b092b 0%, #1a174d 50%, #120e36 100%);
   --sidebar-width: 250px;
 }
 
 [data-theme="light"] {
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --primary-rgb: 59, 130, 246;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-rgb: 37, 99, 235;
   --btn-text-color: #ffffff;
-  --secondary: #22c55e;
-  --secondary-rgb: 34, 197, 94;
-  --accent-glow: #60a5fa;
+  --secondary: #16a34a;
+  --secondary-rgb: 22, 163, 74;
+  --accent-glow: #0284c7;
   --bg-color: #a5c4f7;
-  --sidebar-bg: rgba(255, 255, 255, 0.88);
-  --card-bg: rgba(255, 255, 255, 0.92);
+  --sidebar-bg: rgba(255, 255, 255, 0.92);
+  --card-bg: rgba(255, 255, 255, 0.94);
   --border-color: rgba(148, 163, 184, 0.45);
-  --text-color: #1e293b;
-  --text-dim: #64748b;
-  --glass-bg: rgba(255, 255, 255, 0.9);
+  --text-color: #0f172a;
+  --text-dim: #475569;
+  --glass-bg: rgba(255, 255, 255, 0.92);
   --glass-border: rgba(148, 163, 184, 0.5);
   --shadow: 14px 14px 28px rgba(145, 175, 225, 0.35), -12px -12px 24px rgba(255, 255, 255, 0.9), inset 3px 3px 6px rgba(255, 255, 255, 0.9), inset -3px -3px 6px rgba(165, 195, 245, 0.25);
   --clay-shadow: 10px 10px 20px rgba(145, 175, 225, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
-  --input-bg: rgba(241, 245, 249, 0.85);
+  --input-bg: rgba(241, 245, 249, 0.95);
   --gradient-bg: 
     radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 0px, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(165, 196, 247, 0.6) 0px, transparent 50%),
-    radial-gradient(circle at 50% 10%, rgba(195, 218, 254, 0.7) 0px, transparent 45%),
     linear-gradient(135deg, #a5c4f7 0%, #cbdcfd 50%, #e2ecfe 100%);
 }
 
@@ -419,7 +417,7 @@ body {
   font-size: 2.6rem;
   font-weight: 900;
   letter-spacing: -2px;
-  color: #1e293b;
+  color: var(--text-color);
   margin-bottom: 0.25rem;
 }
 
@@ -450,10 +448,10 @@ body {
 .search-bar,
 .month-selector,
 .theme-select {
-  background: rgba(241, 245, 249, 0.9) !important;
-  border: 2px solid rgba(148, 163, 184, 0.5) !important;
+  background: var(--input-bg) !important;
+  border: 2px solid var(--border-color) !important;
   border-radius: 50px !important;
-  box-shadow: 4px 4px 12px rgba(145, 175, 225, 0.25), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2) !important;
+  color: var(--text-color) !important;
   transition: all 0.3s ease;
 }
 
@@ -533,11 +531,11 @@ body {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 28px;
   padding: 1.2rem 1.5rem;
-  border: 2px solid rgba(148, 163, 184, 0.45);
-  box-shadow: 10px 10px 20px rgba(145, 175, 225, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.9), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
+  border: 2px solid var(--border-color);
+  box-shadow: var(--clay-shadow);
   transition: all 0.35s ease;
 }
 
@@ -612,12 +610,8 @@ textarea,
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(255, 255, 255, 0.48) !important;
-}
-
-[data-theme="light"] input::placeholder,
-[data-theme="light"] textarea::placeholder {
-  color: rgba(0, 0, 0, 0.48) !important;
+  color: var(--text-dim) !important;
+  opacity: 0.8 !important;
 }
 
 input:focus,
@@ -651,14 +645,14 @@ textarea:focus {
 }
 
 .btn-glass {
-  background: #ffffff;
-  border: 2px solid rgba(148, 163, 184, 0.6);
-  color: #1e293b;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-color);
   padding: 0.8rem 1.4rem;
   border-radius: 50px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 6px 6px 14px rgba(145, 175, 225, 0.3), inset 2px 2px 4px rgba(255, 255, 255, 0.95), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
+  box-shadow: var(--clay-shadow);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -875,13 +869,14 @@ tr {
 }
 
 .modal-content {
-  background: #ffffff;
-  border: 2px solid rgba(148, 163, 184, 0.6);
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-color);
   border-radius: 35px;
   width: 90%;
   max-width: 500px;
   padding: 2rem;
-  box-shadow: 20px 20px 40px rgba(145, 175, 225, 0.4), -16px -16px 32px rgba(255, 255, 255, 0.9), inset 3px 3px 6px rgba(255, 255, 255, 0.9), inset -3px -3px 6px rgba(165, 195, 245, 0.2);
+  box-shadow: var(--shadow);
   position: relative;
   animation: modalEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
