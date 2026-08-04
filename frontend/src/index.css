@@ -210,36 +210,35 @@ body {
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   text-decoration: none;
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 }
 
-
-.sidebar-logo .icon {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 0 10px var(--primary));
-  animation: floatingLogo 4s infinite ease-in-out;
-}
-
-@keyframes floatingLogo {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(-5deg);
-  }
-
-  50% {
-    transform: translateY(-8px) rotate(5deg);
-  }
+.sidebar-logo .logo-badge,
+.mobile-nav-logo .logo-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 4px 4px 10px rgba(59, 130, 246, 0.3), inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #1d4ed8;
+  flex-shrink: 0;
 }
 
 .sidebar-logo h1 {
-  font-size: 1.35rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--text-color), var(--text-dim));
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  letter-spacing: -1px;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--text-color);
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  font-family: 'Outfit', sans-serif;
+}
+
+.sidebar-logo h1 span {
+  color: var(--primary);
 }
 
 .sidebar-nav {

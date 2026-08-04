@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import UpdateBanner from './components/UpdateBanner';
-import { Menu } from 'lucide-react';
+import { Menu, Wallet } from 'lucide-react';
 
 // Code-split all views — each is loaded only when the route is first visited
 const Login        = lazy(() => import('./views/Login'));
@@ -66,8 +66,8 @@ function Layout() {
           <Menu size={20} />
         </button>
         <div className="mobile-nav-logo">
-          <span className="logo-icon">💰</span>
-          <span className="logo-text">SPLIT-FRIENDLY</span>
+          <div className="logo-badge"><Wallet size={18} /></div>
+          <span className="logo-text">Split<span style={{ color: 'var(--primary)' }}>Friendly</span></span>
         </div>
       </div>
 

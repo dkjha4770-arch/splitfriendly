@@ -16,7 +16,8 @@ import {
   Percent,
   ArrowLeftRight,
   Download,
-  X
+  X,
+  Wallet
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
@@ -44,8 +45,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
     <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
 
       <Link to="/dashboard" className="sidebar-logo" onClick={onClose}>
-        <span className="icon">💰</span>
-        <h1>SPLIT-FRIENDLY</h1>
+        <div className="logo-badge"><Wallet size={20} /></div>
+        <h1>Split<span>Friendly</span></h1>
       </Link>
 
       <nav className="sidebar-nav">
