@@ -1432,7 +1432,7 @@ tr {
     height: 100dvh;
     border-radius: 0 24px 24px 0;
     width: 280px;
-    transform: translateX(-320px);
+    transform: translateX(-110%) !important;
     /* Hidden offscreen on tablet/mobile by default */
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     background: var(--sidebar-bg) !important;
@@ -1440,7 +1440,7 @@ tr {
   }
 
   .sidebar.mobile-open {
-    transform: translateX(0);
+    transform: translateX(0) !important;
     box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
   }
 
@@ -2080,7 +2080,13 @@ table td,
   color: var(--text-color) !important;
 }
 
-/* Explicitly disable all hover movements and element translations */
-*:hover {
+/* Suppress hover translations for cards/buttons without breaking drawer transforms */
+.card:hover,
+.stat-card:hover,
+.btn-primary:hover,
+.btn-glass:hover,
+.chip:hover,
+.nav-item:hover,
+.ledger-item:hover {
   transform: none !important;
 }
