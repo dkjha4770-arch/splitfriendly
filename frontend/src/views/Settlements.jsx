@@ -23,7 +23,28 @@ export const Settlements = () => {
   const [systemUsers, setSystemUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
+  // Month filter – default to current month
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    return `${yyyy}-${mm}`;
+  });
+
+  // Build last-24-months option list
+  const monthOptions = [];
+  (() => {
+    const today = new Date();
+    for (let i = 0; i < 24; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+      monthOptions.push({ value: `${yyyy}-${mm}`, label });
+    }
+  })();
+
   // Focused Squad view
   const [activeSquad, setActiveSquad] = useState(null);
 
@@ -107,10 +128,13 @@ export const Settlements = () => {
     return 0;
   };
 
-  // Calculate Global Net Position (using all expenses)
+  // Expenses filtered to the selected month
+  const monthlyExpenses = expenses.filter(e => e.date.substring(0, 7) === selectedMonth);
+
+  // Calculate Global Net Position (using monthly expenses only)
   let globalSpent = 0;
   let globalShare = 0;
-  expenses.forEach(e => {
+  monthlyExpenses.forEach(e => {
     if (e.payer.toLowerCase() === myHandle) {
       globalSpent += Number(e.amount);
     }
@@ -123,7 +147,7 @@ export const Settlements = () => {
     const squad = squads.find(s => s.name === squadName);
     if (!squad) return { members: [], totalSpent: 0, totalShare: 0 };
 
-    const squadExpenses = expenses.filter(e => e.squad_name === squadName);
+    const squadExpenses = monthlyExpenses.filter(e => e.squad_name === squadName);
     
     let totalSpent = 0;
     let totalShare = 0;
@@ -176,7 +200,7 @@ export const Settlements = () => {
 
   // Compute Solo Balances
   const computeSoloBalances = () => {
-    const soloExpenses = expenses.filter(e => !e.squad_name);
+    const soloExpenses = monthlyExpenses.filter(e => !e.squad_name);
     
     let totalSpent = 0;
     let totalShare = 0;
@@ -294,8 +318,30 @@ export const Settlements = () => {
           </p>
         </div>
 
-        {/* Squad Selection Dropdown */}
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        {/* Month + Squad Selection */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Month Picker */}
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            style={{
+              background: 'var(--card-bg)',
+              color: 'var(--text-color)',
+              border: '1px solid var(--border-color)',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '12px',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              outline: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            {monthOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+
+          {/* Squad Selection Dropdown */}
           <select 
             value={activeSquad || ''}
             onChange={(e) => setActiveSquad(e.target.value || null)}
@@ -431,7 +477,7 @@ export const Settlements = () => {
         {activeSquad ? (
           (() => {
             const { members, totalSpent, totalShare } = computeSquadBalances(activeSquad);
-            const activeSquadExpenses = expenses.filter(e => e.squad_name === activeSquad);
+            const activeSquadExpenses = monthlyExpenses.filter(e => e.squad_name === activeSquad);
             const activeMemberCards = members.filter(m => Math.abs(m.balance) > 0.01);
             
             return (

@@ -117,8 +117,10 @@ export const Dashboard = () => {
   // Filtered expenses for selected month
   const monthlyExpenses = expenses.filter(e => e.date.substring(0, 7) === selectedMonth);
 
-  // Search & category filters
+  // Search & category filters (settlements are always excluded from the ledger table)
   const filteredExpenses = monthlyExpenses.filter(e => {
+    if (e.category === 'settlement') return false;
+
     const matchesSearch = 
       e.where_spent.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.payer.toLowerCase().includes(searchQuery.toLowerCase());
