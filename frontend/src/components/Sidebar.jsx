@@ -15,6 +15,7 @@ import {
   PlusCircle,
   Percent,
   ArrowLeftRight,
+  CheckCheck,
   Download,
   X,
   Wallet
@@ -117,6 +118,15 @@ export const Sidebar = ({ isOpen, onClose }) => {
         >
           <ArrowLeftRight />
           <span>Settlements</span>
+        </NavLink>
+
+        <NavLink 
+          to="/settlement-details" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleOptionClick}
+        >
+          <CheckCheck />
+          <span>Settlement Details</span>
         </NavLink>
 
         <NavLink 

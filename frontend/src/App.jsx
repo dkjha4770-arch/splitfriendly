@@ -19,6 +19,7 @@ const CommandCentre = lazy(() => import('./views/CommandCentre'));
 const Landing      = lazy(() => import('./views/Landing'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
 const Settlements  = lazy(() => import('./views/Settlements'));
+const SettlementDetails = lazy(() => import('./views/SettlementDetails'));
 
 // Minimal loading spinner shown while a lazy chunk loads
 const PageLoader = () => (
@@ -112,6 +113,7 @@ function App() {
               <Route path="/expenses/new" element={<ExpenseForm />} />
               <Route path="/squads" element={<Squads />} />
               <Route path="/settlements" element={<Settlements />} />
+              <Route path="/settlement-details" element={<SettlementDetails />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<ProtectedRoute requireAdmin><CommandCentre /></ProtectedRoute>} />

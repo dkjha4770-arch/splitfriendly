@@ -97,8 +97,8 @@ export const Expenses = () => {
     setSelectedMonth(`${yyyy}-${mm}`);
   };
 
-  // Filtered lists
-  const monthlyExpenses = expenses.filter(e => e.date.substring(0, 7) === selectedMonth);
+  // Filtered lists (excluding settlements which have their own module)
+  const monthlyExpenses = expenses.filter(e => e.date.substring(0, 7) === selectedMonth && e.category !== 'settlement');
   const filteredExpenses = monthlyExpenses.filter(e => {
     const matchesSearch = 
       e.where_spent.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
 import { 
@@ -455,6 +456,25 @@ export const Settlements = () => {
               <option key={s.id || s.name} value={s.name}>{s.name} Squadron</option>
             ))}
           </select>
+
+          {/* Settlement Details Log Link */}
+          <Link
+            to="/settlement-details"
+            className="btn-glass"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              textDecoration: 'none'
+            }}
+          >
+            <History size={16} />
+            Settlement Logs
+          </Link>
 
           {/* Batch Settle Button */}
           <button
