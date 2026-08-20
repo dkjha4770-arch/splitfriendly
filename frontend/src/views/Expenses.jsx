@@ -35,6 +35,7 @@ export const Expenses = () => {
   
   // Data State
   const [expenses, setExpenses] = useState([]);
+  const [squads, setSquads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -65,14 +66,15 @@ export const Expenses = () => {
     monthOptions.push({ value: `${yyyy}-${mm}`, label });
   }
 
-  // Fetch Expenses
+  // Fetch Expenses + Squads (using /data endpoint for squad membership)
   const fetchExpenses = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/expenses', { headers: authHeaders });
+      const res = await fetch('/api/expenses/data', { headers: authHeaders });
       if (!res.ok) throw new Error('Secure connection failed.');
       const data = await res.json();
-      setExpenses(data || []);
+      setExpenses(data.expenses || []);
+      setSquads(data.squads || []);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -100,23 +102,45 @@ export const Expenses = () => {
   // Derive the current user's handle (username without @domain)
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
 
-  // Helper: check if the current user is in a members field
+  // Build set of squad names the current user belongs to
+  const mySquadNames = new Set(
+    squads
+      .filter(s => {
+        try {
+          const mems = typeof s.members === 'string' ? JSON.parse(s.members || '[]') : s.members;
+          if (Array.isArray(mems)) return mems.some(m => String(m).toLowerCase() === myHandle);
+          if (mems && typeof mems === 'object') return Object.keys(mems).some(k => k.toLowerCase() === myHandle);
+        } catch (_) { /* ignore */ }
+        return false;
+      })
+      .map(s => s.name)
+  );
+
+  // Helper: check if the current user is relevant to this expense
+  // True when:
+  //  1. User is the payer, OR
+  //  2. User is explicitly in the members list, OR
+  //  3. Expense belongs to a squad the user is a member of
   const isMyExpense = (e) => {
-    // I am the payer
+    // 1. I am the payer
     if ((e.payer || '').toLowerCase() === myHandle) return true;
 
-    // I am in the members list
+    // 2. I am in the members list
     try {
       const mems = typeof e.members === 'string' ? JSON.parse(e.members || '[]') : e.members;
       if (Array.isArray(mems)) {
-        return mems.some(m => String(m).toLowerCase() === myHandle);
+        if (mems.some(m => String(m).toLowerCase() === myHandle)) return true;
       }
       if (mems && typeof mems === 'object') {
-        return Object.keys(mems).some(k => k.toLowerCase() === myHandle);
+        if (Object.keys(mems).some(k => k.toLowerCase() === myHandle)) return true;
       }
     } catch (_) {
       // ignore parse errors
     }
+
+    // 3. The expense belongs to a squad I am a member of
+    if (e.squad_name && mySquadNames.has(e.squad_name)) return true;
+
     return false;
   };
 
