@@ -97,8 +97,35 @@ export const Expenses = () => {
     setSelectedMonth(`${yyyy}-${mm}`);
   };
 
-  // Filtered lists (excluding settlements which have their own module)
-  const monthlyExpenses = expenses.filter(e => e.date.substring(0, 7) === selectedMonth && e.category !== 'settlement');
+  // Derive the current user's handle (username without @domain)
+  const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+
+  // Helper: check if the current user is in a members field
+  const isMyExpense = (e) => {
+    // I am the payer
+    if ((e.payer || '').toLowerCase() === myHandle) return true;
+
+    // I am in the members list
+    try {
+      const mems = typeof e.members === 'string' ? JSON.parse(e.members || '[]') : e.members;
+      if (Array.isArray(mems)) {
+        return mems.some(m => String(m).toLowerCase() === myHandle);
+      }
+      if (mems && typeof mems === 'object') {
+        return Object.keys(mems).some(k => k.toLowerCase() === myHandle);
+      }
+    } catch (_) {
+      // ignore parse errors
+    }
+    return false;
+  };
+
+  // Filtered lists (excluding settlements, scoped to current user's expenses)
+  const monthlyExpenses = expenses.filter(e =>
+    e.date.substring(0, 7) === selectedMonth &&
+    e.category !== 'settlement' &&
+    isMyExpense(e)
+  );
   const filteredExpenses = monthlyExpenses.filter(e => {
     const matchesSearch = 
       e.where_spent.toLowerCase().includes(searchQuery.toLowerCase()) ||
