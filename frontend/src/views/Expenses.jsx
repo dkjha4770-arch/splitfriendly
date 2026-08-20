@@ -273,7 +273,7 @@ export const Expenses = () => {
                           {PAYMENT_APPS[e.payment_app]?.label || e.payment_app}
                         </span>
                       </td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--text-dim)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <td style={{ fontSize: '0.8rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>
                         {membersText}
                       </td>
                       <td style={{ textAlign: 'right', fontWeight: 800, color: 'var(--text-color)' }}>₹ {e.amount.toFixed(2)}</td>
