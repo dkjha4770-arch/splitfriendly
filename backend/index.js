@@ -10,15 +10,43 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Configure CORS to allow our React app's port
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+// Configure CORS to allow frontend domains (Vercel, localhost, custom env)
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'https://splitfriendly.vercel.app'
+];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+const envAllowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+  : [];
+
+const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...envAllowedOrigins])];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Check exact match or any *.vercel.app domain
+    if (
+      allowedOrigins.includes(origin) ||
+      /^https:\/\/[a-zA-Z0-9_-]+\.vercel\.app$/.test(origin)
+    ) {
+      return callback(null, true);
+    }
+
+    console.warn(`[CORS] Rejected request from origin: ${origin}`);
+    callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());

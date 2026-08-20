@@ -2,16 +2,16 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
-import { 
-  Plus, 
-  ArrowRight, 
-  Download, 
-  Trash2, 
-  Shield, 
-  Calendar, 
-  DollarSign, 
-  Activity, 
-  CreditCard, 
+import {
+  Plus,
+  ArrowRight,
+  Download,
+  Trash2,
+  Shield,
+  Calendar,
+  DollarSign,
+  Activity,
+  CreditCard,
   Search,
   Users,
   Info
@@ -47,7 +47,7 @@ export const Dashboard = () => {
   const [squads, setSquads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Filters
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const today = new Date();
@@ -94,7 +94,7 @@ export const Dashboard = () => {
       const data = await res.json();
       setExpenses(data.expenses || []);
       setSquads(data.squads || []);
-      
+
       // Auto-select first squad for settlements if none is selected
       if (data.squads && data.squads.length > 0 && !selectedSquadForSettlements) {
         setSelectedSquadForSettlements(data.squads[0].name);
@@ -105,7 +105,7 @@ export const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   useEffect(() => {
@@ -121,12 +121,12 @@ export const Dashboard = () => {
   const filteredExpenses = monthlyExpenses.filter(e => {
     if (e.category === 'settlement') return false;
 
-    const matchesSearch = 
+    const matchesSearch =
       e.where_spent.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.payer.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -165,7 +165,7 @@ export const Dashboard = () => {
   useEffect(() => {
     if (loading || !chartRef.current) return;
     const ctx = chartRef.current.getContext('2d');
-    
+
     if (chartInstance.current) {
       chartInstance.current.destroy();
     }
@@ -240,7 +240,7 @@ export const Dashboard = () => {
 
       // Filter expenses belonging to this squad
       const squadExpenses = expenses.filter(e => e.squad_name === selectedSquadForSettlements);
-      
+
       squadExpenses.forEach(e => {
         const payer = e.payer.toLowerCase();
 
@@ -303,7 +303,7 @@ export const Dashboard = () => {
 
   const executeSettlement = async () => {
     const { squadName, otherUser, amount, heOwesMe } = settlementModal;
-    
+
     // Settlement entry body
     const body = {
       date: new Date().toISOString().split('T')[0],
@@ -320,7 +320,7 @@ export const Dashboard = () => {
     try {
       const res = await fetch('/api/expenses', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...authHeaders
         },
@@ -328,7 +328,7 @@ export const Dashboard = () => {
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Server error.');
-      
+
       setSettlementModal(prev => ({ ...prev, isOpen: false }));
       fetchData();
     } catch (err) {
@@ -348,7 +348,7 @@ export const Dashboard = () => {
     try {
       const res = await fetch('/api/expenses/delete', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...authHeaders
         },
@@ -375,15 +375,15 @@ export const Dashboard = () => {
         <div className="header-actions">
           <div className="search-bar">
             <Search size={16} style={{ color: 'var(--text-dim)' }} />
-            <input 
-              type="text" 
-              placeholder="Search expenses..." 
+            <input
+              type="text"
+              placeholder="Search expenses..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="header-controls-group">
-            <select 
+            <select
               className="month-selector"
               value={selectedMonth}
               onChange={e => setSelectedMonth(e.target.value)}
@@ -405,7 +405,7 @@ export const Dashboard = () => {
       <div className="dashboard-grid">
         {/* Left Column: Stats & Analytics & Recent Activity */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          
+
           {/* Stats widgets */}
           <div className="stats-row">
             <div className="stat-card">
@@ -449,15 +449,15 @@ export const Dashboard = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Tactical Ledger</h3>
               <div className="filter-chips">
-                <span 
+                <span
                   className={`chip ${categoryFilter === 'all' ? 'active' : ''}`}
                   onClick={() => setCategoryFilter('all')}
                 >
                   All Ops
                 </span>
                 {Object.keys(CATEGORIES).map(k => (
-                  <span 
-                    key={k} 
+                  <span
+                    key={k}
                     className={`chip ${categoryFilter === k ? 'active' : ''}`}
                     onClick={() => setCategoryFilter(k)}
                   >
@@ -507,8 +507,8 @@ export const Dashboard = () => {
                         </td>
                         <td style={{ textAlign: 'right', fontWeight: 800, color: 'var(--text-color)' }}>₹ {e.amount.toFixed(2)}</td>
                         <td>
-                          <button 
-                            className="btn-delete" 
+                          <button
+                            className="btn-delete"
                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
                             onClick={() => triggerDelete(e.id)}
                           >
@@ -526,7 +526,7 @@ export const Dashboard = () => {
 
         {/* Right Column: Balance overview & Settlements */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          
+
           {/* Net balance card */}
           <div className="card personal-summary">
             <h3>Obligation Status</h3>
@@ -565,15 +565,15 @@ export const Dashboard = () => {
                 This record will be permanently deleted from the active tactical ledger database. This operation is irreversible.
               </p>
               <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-                <button 
-                  className="btn-glass" 
+                <button
+                  className="btn-glass"
                   style={{ flex: 1 }}
                   onClick={() => setDeleteModal({ isOpen: false, id: null })}
                 >
                   Cancel
                 </button>
-                <button 
-                  className="btn-primary" 
+                <button
+                  className="btn-primary"
                   style={{ flex: 1, marginTop: 0, background: '#ff3b30', boxShadow: 'none' }}
                   onClick={executeDelete}
                 >
