@@ -529,6 +529,8 @@ select option {
 
 .card:hover {
   border-color: rgba(var(--primary-rgb), 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 
@@ -750,8 +752,24 @@ textarea:focus {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.ledger-item:hover {
+  transform: translateY(-4px) scale(1.01);
+  background: rgba(255, 255, 255, 0.06);
+  z-index: 10;
+}
+
+.ledger-item.receivable:hover {
+  border-color: rgba(34, 197, 94, 0.7);
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2), inset 0 0 15px rgba(34, 197, 94, 0.1);
+}
+
+.ledger-item.payable:hover {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2), inset 0 0 15px rgba(239, 68, 68, 0.1);
+}
 
 .ledger-item::before {
   content: '';
@@ -776,12 +794,53 @@ textarea:focus {
 
 .balance-positive {
   color: #22c55e;
-  text-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+  text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
 }
 
 .balance-negative {
   color: #ef4444;
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.btn-collect, .btn-pay {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-collect:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #22c55e;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-pay:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  color: #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+  transform: translateY(-2px);
+}
+
+.chip.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.4);
+  transform: translateY(-2px);
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0); }
 }
 
 /* Tables */
