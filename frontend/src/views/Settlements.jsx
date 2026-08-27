@@ -15,7 +15,8 @@ import {
   Shield,
   Activity,
   CheckSquare,
-  Square
+  Square,
+  Info
 } from 'lucide-react';
 
 export const Settlements = () => {
@@ -68,7 +69,38 @@ export const Settlements = () => {
   });
   const [batchLoading, setBatchLoading] = useState(false);
 
+  const [detailsModal, setDetailsModal] = useState({
+    isOpen: false,
+    squadName: null,
+    username: '',
+    displayName: '',
+    balance: 0,
+    expenses: []
+  });
+
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+
+  const handleDetailsClick = (squadName, username, displayName, balance) => {
+    const contextExpenses = squadName 
+      ? monthlyExpenses.filter(e => e.squad_name === squadName)
+      : monthlyExpenses.filter(e => !e.squad_name);
+      
+    const relevantExpenses = contextExpenses.filter(e => {
+      const payer = e.payer.toLowerCase();
+      if (payer === username && hasMember(e.members, myHandle)) return true;
+      if (payer === myHandle && hasMember(e.members, username)) return true;
+      return false;
+    });
+
+    setDetailsModal({
+      isOpen: true,
+      squadName,
+      username,
+      displayName,
+      balance,
+      expenses: relevantExpenses
+    });
+  };
 
   // Calculate Billing Cycle Start (5th of every month)
   const calculateCycleStart = () => {
@@ -697,7 +729,16 @@ export const Settlements = () => {
                             </span>
                           </div>
                         </div>
-                        {actionBtn}
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <button 
+                            className="chip btn-glass"
+                            onClick={() => handleDetailsClick(activeSquad, m.username, m.displayName, m.balance)}
+                            style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.6rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-color)', borderRadius: '20px' }}
+                          >
+                            Details <ChevronRight size={12} />
+                          </button>
+                          {actionBtn}
+                        </div>
                       </div>
                     );
                   })}
@@ -856,7 +897,16 @@ export const Settlements = () => {
                               </span>
                             </div>
                           </div>
-                          {actionBtn}
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <button 
+                              className="chip btn-glass"
+                              onClick={() => handleDetailsClick(s.name, m.username, m.displayName, m.balance)}
+                              style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.6rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-color)', borderRadius: '20px' }}
+                            >
+                              Details <ChevronRight size={12} />
+                            </button>
+                            {actionBtn}
+                          </div>
                         </div>
                       );
                     })}
@@ -949,7 +999,16 @@ export const Settlements = () => {
                             </span>
                           </div>
                         </div>
-                        {actionBtn}
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <button 
+                            className="chip btn-glass"
+                            onClick={() => handleDetailsClick('', m.username, m.displayName, m.balance)}
+                            style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.6rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-color)', borderRadius: '20px' }}
+                          >
+                            Details <ChevronRight size={12} />
+                          </button>
+                          {actionBtn}
+                        </div>
                       </div>
                     );
                   })}
@@ -1168,6 +1227,98 @@ export const Settlements = () => {
                     )}
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {/* Details Modal */}
+      {detailsModal.isOpen && (
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setDetailsModal(prev => ({ ...prev, isOpen: false }))}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '520px', width: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Info size={20} style={{ color: 'var(--primary)' }} />
+                    Settlement Details
+                  </h3>
+                  <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginTop: '0.25rem', marginBottom: 0 }}>
+                    Balance with <strong>{detailsModal.displayName}</strong> {detailsModal.squadName ? `in ${detailsModal.squadName} Squadron` : 'in Direct / Solo'}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setDetailsModal(prev => ({ ...prev, isOpen: false }))}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1 }}
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
+                {detailsModal.expenses.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {detailsModal.expenses.map(e => {
+                      const isIPaid = e.payer.toLowerCase() === myHandle;
+                      const otherUserShare = isIPaid ? getShare(e, detailsModal.username) : getShare(e, myHandle);
+                      if (otherUserShare === 0) return null;
+                      
+                      return (
+                        <div key={e.id} style={{ 
+                          padding: '1rem', 
+                          borderRadius: '12px', 
+                          border: '1px solid var(--border-color)', 
+                          background: 'var(--input-bg)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '1rem'
+                        }}>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                                {new Date(e.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--primary)' }}>{e.category}</span>
+                            </div>
+                            <div style={{ fontWeight: 700, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {e.where_spent}
+                            </div>
+                          </div>
+                          
+                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '0.2rem', textTransform: 'uppercase' }}>
+                              {isIPaid ? 'They Owe You' : 'You Owe Them'}
+                            </div>
+                            <div style={{ 
+                              fontWeight: 900, 
+                              fontSize: '1.1rem',
+                              color: isIPaid ? '#10b981' : '#f59e0b' 
+                            }}>
+                              {isIPaid ? '+' : '-'}₹{otherUserShare.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '3rem 1rem', opacity: 0.5 }}>
+                    <p style={{ margin: 0, fontSize: '0.9rem' }}>No individual transactions found for this balance.</p>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: 600 }}>Net Balance</span>
+                <span style={{ 
+                  fontWeight: 900, 
+                  fontSize: '1.4rem',
+                  color: detailsModal.balance > 0 ? '#10b981' : (detailsModal.balance < 0 ? '#f59e0b' : 'var(--text-color)')
+                }}>
+                  {detailsModal.balance > 0 ? '+' : ''}₹{Math.abs(detailsModal.balance).toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
