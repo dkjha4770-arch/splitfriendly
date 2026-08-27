@@ -559,56 +559,49 @@ export const Settlements = () => {
 
       {/* Global overview / Focused view card */}
       {!activeSquad ? (
-        <div className="card" style={{
-          marginBottom: '2.5rem',
-          background: 'var(--card-bg)',
-          border: '1px solid var(--border-color)',
-          padding: '2rem',
-          boxShadow: 'var(--shadow)',
-          borderRadius: '24px'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 800, display: 'block', marginBottom: '0.5rem' }}>
-                Operational Status Overview
-              </span>
-              <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-color)' }}>Global Net Position</h2>
-            </div>
+        <div className="settlement-hero">
+          <div style={{ zIndex: 1, position: 'relative' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 800, display: 'block', marginBottom: '0.75rem' }}>
+              Operational Status Overview
+            </span>
+            <h2 style={{ margin: 0, fontSize: '2.5rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-1px' }}>Global Net Position</h2>
             <div style={{ 
-              background: 'var(--input-bg)', 
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-color)', 
-              padding: '0.55rem 1.1rem', 
-              borderRadius: '12px', 
-              fontSize: '0.8rem', 
-              fontWeight: 800, 
-              display: 'flex', 
+              marginTop: '1rem',
+              display: 'inline-flex',
+              background: 'rgba(255,255,255,0.1)', 
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: '#fff', 
+              padding: '0.5rem 1rem', 
+              borderRadius: '20px', 
+              fontSize: '0.85rem', 
+              fontWeight: 700, 
               alignItems: 'center', 
               gap: '0.5rem' 
             }}>
-              Cycle Start: {cycleText}
+              <Calendar size={14} /> Cycle Start: {cycleText}
             </div>
           </div>
 
-          <div className="settlements-overview-stats" style={{ display: 'flex', gap: '2.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="settlements-overview-stats" style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center', zIndex: 1, position: 'relative' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Total Deployment</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>₹ {globalSpent.toFixed(2)}</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Total Deployment</span>
+              <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff' }}>₹ {globalSpent.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Total Obligation</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>₹ {globalShare.toFixed(2)}</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Total Obligation</span>
+              <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff' }}>₹ {globalShare.toFixed(2)}</span>
             </div>
             <div className="settlements-net-box" style={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              padding: '0.8rem 1.5rem', 
-              background: 'var(--input-bg)', 
-              borderRadius: '16px', 
-              border: '1px solid var(--border-color)'
+              padding: '1.25rem 2rem', 
+              background: 'rgba(0,0,0,0.4)', 
+              borderRadius: '24px', 
+              border: `1px solid ${globalNet >= 0 ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+              boxShadow: globalNet >= 0 ? '0 0 30px rgba(34, 197, 94, 0.15)' : '0 0 30px rgba(239, 68, 68, 0.15)'
             }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>Net Settlement Balance</span>
-              <span className={globalNet >= 0 ? 'balance-positive' : 'balance-negative'} style={{ fontSize: '1.8rem', fontWeight: 900 }}>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Net Balance</span>
+              <span className={globalNet >= 0 ? 'balance-positive' : 'balance-negative'} style={{ fontSize: '2.5rem', fontWeight: 900, lineHeight: 1 }}>
                 {globalNet >= 0 ? '+' : ''}₹ {Math.abs(globalNet).toFixed(2)}
               </span>
             </div>
@@ -648,27 +641,27 @@ export const Settlements = () => {
             const activeMemberCards = members.filter(m => Math.abs(m.balance) > 0.01);
             
             return (
-              <div className="card" style={{ padding: '2rem', border: '2px solid var(--primary)', background: 'var(--card-bg)' }}>
+              <div className="settlement-squad-card" style={{ border: '2px solid var(--primary)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <Shield style={{ color: 'var(--primary)', width: 22 }} />
-                    <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.1rem', fontWeight: 800 }}>
-                      {activeSquad} Squadron
+                    <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-color)' }}>
+                      {activeSquad}
                     </h3>
                   </div>
-                  <div style={{ display: 'flex', gap: '1.5rem', marginLeft: 'auto', fontSize: '0.8rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span style={{ color: 'var(--text-dim)', fontSize: '0.6rem', textTransform: 'uppercase' }}>Squad Spent</span>
-                      <b style={{ color: 'var(--text-dim)' }}>₹ {totalSpent.toFixed(2)}</b>
+                  <div style={{ display: 'flex', gap: '2rem', fontSize: '0.8rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ color: 'var(--text-dim)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Volume</span>
+                      <b style={{ color: 'var(--text-color)', fontSize: '1rem' }}>₹ {totalSpent.toFixed(2)}</b>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span style={{ color: 'var(--text-dim)', fontSize: '0.6rem', textTransform: 'uppercase' }}>My Share</span>
-                      <b>₹ {totalShare.toFixed(2)}</b>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ color: 'var(--text-dim)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Obligation</span>
+                      <b style={{ color: 'var(--text-color)', fontSize: '1rem' }}>₹ {totalShare.toFixed(2)}</b>
                     </div>
                   </div>
                 </div>
 
-                <div className="ledger-full" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                <div className="ledger-full" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
                   {activeMemberCards.map(m => {
                     const isOwed = m.balance > 0.01;
                     const isI_Owe = m.balance < -0.01;
@@ -735,7 +728,7 @@ export const Settlements = () => {
                             onClick={() => handleDetailsClick(activeSquad, m.username, m.displayName, m.balance)}
                             style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.6rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-color)', borderRadius: '20px' }}
                           >
-                            Details <ChevronRight size={12} />
+                            <Info size={12} />
                           </button>
                           {actionBtn}
                         </div>
@@ -788,136 +781,141 @@ export const Settlements = () => {
             );
           })()
         ) : (
-          /* Global Overview: Show all squads' balances */
           <>
-            {squads.map(s => {
-              const { members, totalSpent, totalShare } = computeSquadBalances(s.name);
-              const activeMemberCards = members.filter(m => Math.abs(m.balance) > 0.01);
-              
-              if (activeMemberCards.length === 0) return null; // Hide squads with no balances
+            <div className="settlement-grid">
+              {squads.map(s => {
+                const { members, totalSpent, totalShare } = computeSquadBalances(s.name);
+                const activeMemberCards = members.filter(m => Math.abs(m.balance) > 0.01);
+                
+                if (activeMemberCards.length === 0) return null; // Hide squads with no balances
 
-              return (
-                <div key={s.name} className="card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <Users style={{ color: 'var(--primary)', width: 18 }} />
-                      <h3 style={{ margin: 0, fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)', fontWeight: 800 }}>
-                        {s.name} Balances
-                      </h3>
-                    </div>
-                    
-                    <div style={{ display: 'flex', gap: '1.2rem', marginLeft: 'auto', fontSize: '0.75rem' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ color: 'var(--text-dim)', fontSize: '0.55rem', textTransform: 'uppercase' }}>Volume</span>
-                        <b style={{ color: 'var(--text-dim)' }}>₹ {totalSpent.toFixed(2)}</b>
+                return (
+                  <div key={s.name} className="settlement-squad-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <Users style={{ color: 'var(--primary)', width: 22 }} />
+                        <h3 style={{ margin: 0, fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-color)', fontWeight: 900 }}>
+                          {s.name}
+                        </h3>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ color: 'var(--text-dim)', fontSize: '0.55rem', textTransform: 'uppercase' }}>Obligation</span>
-                        <b>₹ {totalShare.toFixed(2)}</b>
-                      </div>
+                      
                       <button 
                         onClick={() => setActiveSquad(s.name)}
                         style={{
                           background: 'var(--input-bg)',
                           border: '1px solid var(--border-color)',
                           color: 'var(--text-color)',
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '8px',
+                          padding: '0.4rem 1rem',
+                          borderRadius: '12px',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.2rem',
-                          fontSize: '0.75rem',
-                          fontWeight: 700
+                          gap: '0.4rem',
+                          fontSize: '0.85rem',
+                          fontWeight: 800,
+                          transition: 'all 0.3s ease'
                         }}
+                        onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-color)'; }}
                       >
-                        Details <ChevronRight size={12} />
+                        Enter Squad <ChevronRight size={14} />
                       </button>
                     </div>
-                  </div>
 
-                  <div className="ledger-full" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                    {activeMemberCards.map(m => {
-                      const isOwed = m.balance > 0.01;
-                      const isI_Owe = m.balance < -0.01;
-                      
-                      let actionBtn = null;
-                      if (isOwed) {
-                        actionBtn = (
-                          <button 
-                            className="chip btn-collect" 
-                            onClick={() => handleSettleClick(s.name, m.username, m.balance)}
-                            style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                          >
-                            <CheckCircle size={12} /> Received
-                          </button>
-                        );
-                      } else if (isI_Owe) {
-                        actionBtn = (
-                          <button 
-                            className="chip btn-pay" 
-                            onClick={() => handleSettleClick(s.name, m.username, m.balance)}
-                            style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                          >
-                            <Send size={12} /> Pay Now
-                          </button>
-                        );
-                      }
+                    <div style={{ display: 'flex', gap: '2rem', fontSize: '0.8rem', padding: '0.5rem 0' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ color: 'var(--text-dim)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Volume</span>
+                        <b style={{ color: 'var(--text-color)', fontSize: '1rem' }}>₹ {totalSpent.toFixed(2)}</b>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ color: 'var(--text-dim)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Obligation</span>
+                        <b style={{ color: 'var(--text-color)', fontSize: '1rem' }}>₹ {totalShare.toFixed(2)}</b>
+                      </div>
+                    </div>
 
-                      return (
-                        <div 
-                          key={m.username} 
-                          className={`ledger-item ${isOwed ? 'receivable' : 'payable'}`}
-                          style={{ width: '100%', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '12px', padding: '0.9rem', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                            <div 
-                              className="user-avatar" 
-                              style={{ 
-                                width: 38, 
-                                height: 38, 
-                                fontSize: '0.9rem', 
-                                fontWeight: 800,
-                                color: '#ffffff',
-                                background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))', 
-                                flexShrink: 0,
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              {m.displayName[0].toUpperCase()}
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                              <span style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.displayName}</span>
-                              <span className={m.balance >= 0 ? 'balance-positive' : 'balance-negative'} style={{ fontWeight: 800, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
-                                {m.balance >= 0 ? '+' : ''}₹ {Math.abs(m.balance).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div className="ledger-full" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {activeMemberCards.map(m => {
+                        const isOwed = m.balance > 0.01;
+                        const isI_Owe = m.balance < -0.01;
+                        
+                        let actionBtn = null;
+                        if (isOwed) {
+                          actionBtn = (
                             <button 
-                              className="chip btn-glass"
-                              onClick={() => handleDetailsClick(s.name, m.username, m.displayName, m.balance)}
-                              style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.6rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-color)', borderRadius: '20px' }}
+                              className="chip btn-collect" 
+                              onClick={() => handleSettleClick(s.name, m.username, m.balance)}
+                              style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
                             >
-                              Details <ChevronRight size={12} />
+                              <CheckCircle size={12} /> Received
                             </button>
-                            {actionBtn}
+                          );
+                        } else if (isI_Owe) {
+                          actionBtn = (
+                            <button 
+                              className="chip btn-pay" 
+                              onClick={() => handleSettleClick(s.name, m.username, m.balance)}
+                              style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                            >
+                              <Send size={12} /> Pay Now
+                            </button>
+                          );
+                        }
+
+                        return (
+                          <div 
+                            key={m.username} 
+                            className={`ledger-item ${isOwed ? 'receivable' : 'payable'}`}
+                            style={{ width: '100%', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '12px', padding: '0.9rem', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                              <div 
+                                className="user-avatar" 
+                                style={{ 
+                                  width: 38, 
+                                  height: 38, 
+                                  fontSize: '0.9rem', 
+                                  fontWeight: 800,
+                                  color: '#ffffff',
+                                  background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))', 
+                                  flexShrink: 0,
+                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                {m.displayName[0].toUpperCase()}
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.displayName}</span>
+                                <span className={m.balance >= 0 ? 'balance-positive' : 'balance-negative'} style={{ fontWeight: 800, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
+                                  {m.balance >= 0 ? '+' : ''}₹ {Math.abs(m.balance).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <button 
+                                className="chip btn-glass"
+                                onClick={() => handleDetailsClick(s.name, m.username, m.displayName, m.balance)}
+                                style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.6rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-color)', borderRadius: '20px' }}
+                              >
+                                <Info size={12} />
+                              </button>
+                              {actionBtn}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
 
             {/* Direct / Solo Balances (Outside any Squad) */}
             {soloBalances.members.length > 0 && (
-              <div className="card" style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="settlement-squad-card" style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(0,0,0,0.1)' }}>
                 <div style={{ display: 'flex', justifyBetween: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <Activity style={{ color: 'var(--text-color)', width: 18 }} />
@@ -937,8 +935,7 @@ export const Settlements = () => {
                     </div>
                   </div>
                 </div>
-
-                <div className="ledger-full" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                <div className="ledger-full" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {soloBalances.members.map(m => {
                     const isOwed = m.balance > 0.01;
                     const isI_Owe = m.balance < -0.01;
@@ -970,28 +967,28 @@ export const Settlements = () => {
                       <div 
                         key={m.username} 
                         className={`ledger-item ${isOwed ? 'receivable' : 'payable'}`}
-                        style={{ width: '100%', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '12px', padding: '0.9rem', background: 'rgba(255,255,255,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
+                        style={{ width: '100%', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '12px', padding: '0.9rem', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                            <div 
-                              className="user-avatar" 
-                              style={{ 
-                                width: 38, 
-                                height: 38, 
-                                fontSize: '0.9rem', 
-                                fontWeight: 800,
-                                color: '#ffffff',
-                                background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))', 
-                                flexShrink: 0,
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              {m.displayName[0].toUpperCase()}
-                            </div>
+                          <div 
+                            className="user-avatar" 
+                            style={{ 
+                              width: 38, 
+                              height: 38, 
+                              fontSize: '0.9rem', 
+                              fontWeight: 800,
+                              color: '#ffffff',
+                              background: m.avatarColor ? `linear-gradient(${m.avatarColor})` : 'linear-gradient(135deg, var(--primary), var(--secondary))', 
+                              flexShrink: 0,
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            {m.displayName[0].toUpperCase()}
+                          </div>
                           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.displayName}</span>
                             <span className={m.balance >= 0 ? 'balance-positive' : 'balance-negative'} style={{ fontWeight: 800, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
@@ -1005,7 +1002,7 @@ export const Settlements = () => {
                             onClick={() => handleDetailsClick('', m.username, m.displayName, m.balance)}
                             style={{ pointerEvents: 'auto', flexShrink: 0, transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.4rem 0.6rem', fontSize: '0.75rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-color)', borderRadius: '20px' }}
                           >
-                            Details <ChevronRight size={12} />
+                            <Info size={12} />
                           </button>
                           {actionBtn}
                         </div>
