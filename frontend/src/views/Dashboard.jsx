@@ -364,161 +364,226 @@ export const Dashboard = () => {
     }
   };
 
-  // Calculate Global Balances for the "TOTAL BALANCE" card
-  let totalOwedToMe = 0;
-  let totalIOwe = 0;
-  const globalBalances = {};
-
-  expenses.forEach(e => {
-    if (e.category === 'settlement') return;
-    
-    const payer = e.payer.toLowerCase();
-    
-    if (payer === myHandle) {
-      if (e.members && typeof e.members === 'object' && !Array.isArray(e.members)) {
-        for (const [mem, amt] of Object.entries(e.members)) {
-          if (mem.toLowerCase() !== myHandle) {
-            globalBalances[mem.toLowerCase()] = (globalBalances[mem.toLowerCase()] || 0) + Number(amt);
-          }
-        }
-      } else if (Array.isArray(e.members)) {
-        e.members.forEach(mem => {
-          if (mem.toLowerCase() !== myHandle) {
-            globalBalances[mem.toLowerCase()] = (globalBalances[mem.toLowerCase()] || 0) + Number(e.share);
-          }
-        });
-      }
-    } else {
-      if (e.members && typeof e.members === 'object' && !Array.isArray(e.members)) {
-        if (e.members[myHandle] !== undefined) {
-          globalBalances[payer] = (globalBalances[payer] || 0) - Number(e.members[myHandle]);
-        }
-      } else if (Array.isArray(e.members)) {
-        if (e.members.map(m => m.toLowerCase()).includes(myHandle)) {
-          globalBalances[payer] = (globalBalances[payer] || 0) - Number(e.share);
-        }
-      }
-    }
-  });
-
-  expenses.filter(e => e.category === 'settlement').forEach(e => {
-    const payer = e.payer.toLowerCase();
-    if (payer === myHandle && e.members && e.members.length > 0) {
-      const receiver = e.members[0].toLowerCase();
-      globalBalances[receiver] = (globalBalances[receiver] || 0) + Number(e.amount);
-    } else if (e.members && e.members.length > 0 && e.members[0].toLowerCase() === myHandle) {
-      globalBalances[payer] = (globalBalances[payer] || 0) - Number(e.amount);
-    }
-  });
-
-  for (const bal of Object.values(globalBalances)) {
-    if (bal > 0.05) totalOwedToMe += bal;
-    else if (bal < -0.05) totalIOwe += Math.abs(bal);
-  }
-
   return (
-    <div className="view-section dashboard-redesign">
-      
-      {/* TOTAL BALANCE CARD */}
-      <div className="balance-card">
-        <h3 className="balance-card-title">TOTAL BALANCE</h3>
-        
-        <div className="balance-row owed">
-          <div className="balance-row-header">
-            <span className="icon-arrow down">↓</span> You are owed
-          </div>
-          <div className="balance-amount positive">${totalOwedToMe.toFixed(2)}</div>
+    <div className="view-section">
+      {/* Header */}
+      <header className="content-header">
+        <div className="header-title">
+          <h2>Dashboard</h2>
+          <p>Operative Command & Ledger status.</p>
         </div>
-        
-        <div className="balance-row owe">
-          <div className="balance-row-header">
-            <span className="icon-arrow up">↑</span> You owe
+        <div className="header-actions">
+          <div className="search-bar">
+            <Search size={16} style={{ color: 'var(--text-dim)' }} />
+            <input
+              type="text"
+              placeholder="Search expenses..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
           </div>
-          <div className="balance-amount negative">${totalIOwe.toFixed(2)}</div>
+          <div className="header-controls-group">
+            <select
+              className="month-selector"
+              value={selectedMonth}
+              onChange={e => setSelectedMonth(e.target.value)}
+            >
+              {monthOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+
+            <Link to="/expenses/new" className="btn-glass" style={{ textDecoration: 'none', background: 'var(--primary)', color: 'var(--btn-text-color)', border: 'none' }}>
+              <Plus size={16} />
+              <span>Launch Split</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Grid */}
+      <div className="dashboard-grid">
+        {/* Left Column: Stats & Analytics & Recent Activity */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+          {/* Stats widgets */}
+          <div className="stats-row">
+            <div className="stat-card">
+              <div className="stat-icon total">
+                <DollarSign size={24} />
+              </div>
+              <div>
+                <span className="stat-label">Tactical Volume</span>
+                <span className="stat-value">₹ {totalVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon entries">
+                <Activity size={24} />
+              </div>
+              <div>
+                <span className="stat-label">Active Missions</span>
+                <span className="stat-value">{totalEntries} entries</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Doughnut Chart Card */}
+          {Object.keys(categoryTotals).length > 0 ? (
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '320px' }}>
+              <h3 style={{ alignSelf: 'flex-start', marginBottom: '1rem', fontSize: '1rem', fontWeight: 800 }}>Category Breakdown</h3>
+              <div style={{ position: 'relative', width: '100%', height: '230px' }}>
+                <canvas ref={chartRef}></canvas>
+              </div>
+            </div>
+          ) : (
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', textAlign: 'center' }}>
+              <Info size={36} style={{ color: 'var(--text-dim)', marginBottom: '1rem' }} />
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.25rem' }}>No Data Encoded</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No operational expenses logged in this monthly segment.</p>
+            </div>
+          )}
+
+          {/* Recent Activity Table */}
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Tactical Ledger</h3>
+              <div className="filter-chips">
+                <span
+                  className={`chip ${categoryFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setCategoryFilter('all')}
+                >
+                  All Ops
+                </span>
+                {Object.keys(CATEGORIES).map(k => (
+                  <span
+                    key={k}
+                    className={`chip ${categoryFilter === k ? 'active' : ''}`}
+                    onClick={() => setCategoryFilter(k)}
+                  >
+                    {CATEGORIES[k].label}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {loading ? (
+              <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>Syncing ledger...</p>
+            ) : filteredExpenses.length === 0 ? (
+              <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>No operational logs matching current filters.</p>
+            ) : (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Mission Objective</th>
+                      <th>Payer</th>
+                      <th>Category</th>
+                      <th>Execution</th>
+                      <th style={{ textAlign: 'right' }}>Amount</th>
+                      <th style={{ width: '40px' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredExpenses.map(e => (
+                      <tr key={e.id}>
+                        <td>{new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</td>
+                        <td>
+                          <div style={{ fontWeight: 700 }}>{e.where_spent}</div>
+                          {e.squad_name && <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 800 }}>SQUAD: {e.squad_name.toUpperCase()}</div>}
+                        </td>
+                        <td><span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{e.payer}</span></td>
+                        <td>
+                          <span className="cat-badge" style={{ borderColor: CATEGORIES[e.category]?.color + '40', background: CATEGORIES[e.category]?.color + '10' }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: CATEGORIES[e.category]?.color || '#868e96' }}></span>
+                            {CATEGORIES[e.category]?.label || e.category}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`app-badge ${PAYMENT_APPS[e.payment_app]?.badge || 'badge-green'}`}>
+                            {PAYMENT_APPS[e.payment_app]?.label || e.payment_app}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 800, color: 'var(--text-color)' }}>₹ {e.amount.toFixed(2)}</td>
+                        <td>
+                          <button
+                            className="btn-delete"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                            onClick={() => triggerDelete(e.id)}
+                          >
+                            <Trash2 size={15} style={{ color: '#ff3b30' }} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Balance overview & Settlements */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+          {/* Net balance card */}
+          <div className="card personal-summary">
+            <h3>Obligation Status</h3>
+            <div className="summary-details">
+              <div className="summary-row">
+                <span className="lbl">Total Disbursed</span>
+                <span className="val">₹ {totalSpent.toFixed(2)}</span>
+              </div>
+              <div className="summary-row">
+                <span className="lbl">System Liability</span>
+                <span className="val">₹ {totalShare.toFixed(2)}</span>
+              </div>
+              <div style={{ height: '1px', background: 'var(--border-color)', margin: '0.5rem 0' }}></div>
+              <div className="summary-row" style={{ alignItems: 'center' }}>
+                <span style={{ fontWeight: 800 }}>Net Friction</span>
+                <span className={`val ${netBalance >= 0 ? 'balance-positive' : 'balance-negative'}`} style={{ fontSize: '1.25rem', fontWeight: 900 }}>
+                  {netBalance >= 0 ? '+' : ''}₹ {netBalance.toFixed(2)}
+                </span>
+              </div>
+              <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 600 }}>
+                <Calendar size={12} />
+                <span>Active Cycle: 5th of Month to Date</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* RECENT GROUPS */}
-      <div className="section-header">
-        <h2 className="section-title">Recent Groups</h2>
-        <Link to="/squads" className="view-all-link">View All</Link>
-      </div>
-      
-      <div className="recent-groups-container">
-        {squads.length > 0 ? squads.slice(0, 4).map(squad => (
-          <Link to={`/squads?id=${squad.name}`} key={squad.name} className="group-card" style={{ textDecoration: 'none' }}>
-            <div className="group-icon-wrapper">
-              <div className="group-icon">
-                {squad.name.substring(0, 1).toUpperCase()}
+      {/* Delete Modal Dialog */}
+      {deleteModal.isOpen && (
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setDeleteModal({ isOpen: false, id: null })}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem', color: '#ff3b30' }}>Delete Entry?</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '1.5rem', lineHeight: '1.4' }}>
+                This record will be permanently deleted from the active tactical ledger database. This operation is irreversible.
+              </p>
+              <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                <button
+                  className="btn-glass"
+                  style={{ flex: 1 }}
+                  onClick={() => setDeleteModal({ isOpen: false, id: null })}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn-primary"
+                  style={{ flex: 1, marginTop: 0, background: '#ff3b30', boxShadow: 'none' }}
+                  onClick={executeDelete}
+                >
+                  Delete Entry
+                </button>
               </div>
             </div>
-            <div className="group-info">
-              <h4>{squad.name}</h4>
-              <p>{squad.members?.length || 0} members</p>
-            </div>
-          </Link>
-        )) : (
-          <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>No groups found. Create one to get started.</p>
-        )}
-      </div>
-
-      {/* RECENT ACTIVITY */}
-      <div className="section-header">
-        <h2 className="section-title">Recent Activity</h2>
-      </div>
-
-      <div className="recent-activity-container">
-        {filteredExpenses.slice(0, 10).map((expense, idx) => {
-          const payerIsMe = expense.payer.toLowerCase() === myHandle;
-          // Determine if this expense involved me
-          let myShare = 0;
-          if (expense.members && typeof expense.members === 'object' && !Array.isArray(expense.members)) {
-             myShare = Number(expense.members[myHandle] || 0);
-          } else if (Array.isArray(expense.members)) {
-             myShare = expense.members.map(m => m.toLowerCase()).includes(myHandle) ? Number(expense.share) : 0;
-          }
-          
-          let displayAmount = '';
-          let amountClass = '';
-          
-          if (payerIsMe) {
-            // I paid, so I am owed (Total amount - my share)
-            const owedToMe = Number(expense.amount) - myShare;
-            displayAmount = `+$${owedToMe.toFixed(2)}`;
-            amountClass = 'positive';
-          } else {
-            // Someone else paid, I owe my share
-            if (myShare > 0) {
-              displayAmount = `-$${myShare.toFixed(2)}`;
-              amountClass = 'negative';
-            } else {
-              displayAmount = `$${Number(expense.amount).toFixed(2)}`;
-              amountClass = 'neutral';
-            }
-          }
-
-          const init = expense.payer.substring(0, 2).toUpperCase();
-
-          return (
-            <div className="activity-item" key={expense.id || idx}>
-              <div className="activity-avatar">{init}</div>
-              <div className="activity-details">
-                <div className="activity-name">{expense.payer}</div>
-                <div className="activity-desc">{expense.where_spent}</div>
-              </div>
-              <div className="activity-meta">
-                <div className={`activity-amount ${amountClass}`}>{displayAmount}</div>
-                <div className="activity-date">
-                  {new Date(expense.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                </div>
-              </div>
-            </div>
-          )
-        })}
-        {filteredExpenses.length === 0 && (
-          <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', padding: '1rem' }}>No recent activity.</p>
-        )}
-      </div>
+          </div>
+        </ModalPortal>
+      )}
 
     </div>
   );
