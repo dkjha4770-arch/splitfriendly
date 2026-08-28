@@ -70,7 +70,7 @@ router.get('/data', authMiddleware, async (req, res) => {
 
   try {
     const allUsersRows = await client.query('SELECT username, display_name, avatar_color, unique_id FROM users');
-    const rawExpensesRows = await client.query('SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name FROM expenses ORDER BY date DESC, id DESC');
+    const rawExpensesRows = await client.query('SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name, created_at FROM expenses ORDER BY date DESC, id DESC');
     const rawSquadsRows = await client.query('SELECT s.id, s.name, s.creator_id, s.members, u.username as creator FROM squads s JOIN users u ON s.creator_id = u.id');
 
     const allUsers = allUsersRows.rows;
@@ -177,7 +177,7 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     const aliasMap = await getAliasMap();
     const rawExpenses = await db.query(
-      'SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name FROM expenses ORDER BY date DESC, id DESC'
+      'SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name, created_at FROM expenses ORDER BY date DESC, id DESC'
     );
     const expenses = rawExpenses.map(exp => processExpenseAliases(exp, aliasMap));
     return res.json(expenses);

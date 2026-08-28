@@ -280,6 +280,7 @@ export const Expenses = () => {
               <thead>
                 <tr>
                   <th>Execution Date</th>
+                  <th>Added On</th>
                   <th>Mission Objective</th>
                   <th>Payer</th>
                   <th>Category Scope</th>
@@ -307,6 +308,9 @@ export const Expenses = () => {
                     <tr key={e.id}>
                       <td style={{ whiteSpace: 'nowrap' }}>
                         {new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                        {e.created_at ? new Date(e.created_at).toLocaleString(undefined, { day: 'numeric', month: 'short', year: '2-digit', hour: 'numeric', minute: 'numeric' }) : '-'}
                       </td>
                       <td>
                         <div style={{ fontWeight: 700 }}>{e.where_spent}</div>
