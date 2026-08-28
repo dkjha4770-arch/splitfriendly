@@ -68,7 +68,7 @@ function Layout() {
         </button>
         <div className="mobile-nav-logo">
           <div className="logo-badge"><Wallet size={18} /></div>
-          <span className="logo-text">Split<span style={{ color: 'var(--primary)' }}>Friendly</span></span>
+          <span className="logo-text">Fair<span style={{ color: 'var(--primary)' }}>Share</span></span>
         </div>
       </div>
 

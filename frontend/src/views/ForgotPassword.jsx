@@ -70,7 +70,7 @@ export const ForgotPassword = () => {
         </div>
 
         <a 
-          href="https://wa.me/917479754628?text=Hello%20Admin,%20I%20need%20to%20reset%20my%20Split-Friendly%20password." 
+          href="https://wa.me/917479754628?text=Hello%20Admin,%20I%20need%20to%20reset%20my%20FairShare%20password." 
           target="_blank" 
           rel="noopener noreferrer"
           className="btn-primary"

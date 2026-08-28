@@ -175,7 +175,7 @@ export const Register = () => {
             </div>
             {username && (
               <p style={{ fontSize: '0.7rem', color: 'var(--text-color)', marginTop: '0.4rem', opacity: 0.8 }}>
-                Your complete username: <strong>{username.trim()}@splitfriendly</strong>
+                Your complete username: <strong>{username.trim()}@fairshare</strong>
               </p>
             )}
           </div>

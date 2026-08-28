@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { KeyRound, User, Lock, AlertCircle } from 'lucide-react';
+import { KeyRound, User, Lock, AlertCircle, Wallet } from 'lucide-react';
 
 export const Login = () => {
   const { login } = useAuth();
@@ -59,9 +59,11 @@ export const Login = () => {
         background: 'var(--card-bg)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span style={{ fontSize: '3rem', filter: 'drop-shadow(0 0 10px var(--primary))' }}>💰</span>
+          <div style={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', width: '80px', height: '80px', borderRadius: '24px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+            <Wallet size={40} color="#fff" strokeWidth={2.5} />
+          </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '1rem', letterSpacing: '-1px' }}>
-            SPLIT-FRIENDLY
+            FAIRSHARE
           </h2>
           <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
             Secure Expenses Synchronization Subsystem
@@ -107,7 +109,7 @@ export const Login = () => {
             </div>
             {username && !username.includes('@') && (
               <p style={{ fontSize: '0.7rem', color: 'var(--text-color)', marginTop: '0.4rem', opacity: 0.8, display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                Will log in as: <strong>{username.trim()}@splitfriendly</strong>
+                Will log in as: <strong>{username.trim()}@fairshare</strong>
               </p>
             )}
           </div>

@@ -61,7 +61,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       <Link to="/dashboard" className="sidebar-logo" onClick={handleOptionClick}>
         <div className="logo-badge"><Wallet size={20} /></div>
-        <h1>Split<span>Friendly</span></h1>
+        <h1>Fair<span>Share</span></h1>
       </Link>
 
       <nav className="sidebar-nav">

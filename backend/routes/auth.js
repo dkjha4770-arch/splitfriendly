@@ -23,8 +23,8 @@ router.post('/register', async (req, res) => {
   }
 
   let finalUsername = username;
-  if (!finalUsername.endsWith('@splitfriendly')) {
-    finalUsername += '@splitfriendly';
+  if (!finalUsername.includes('@')) {
+    finalUsername += '@fairshare';
   }
 
   if (password.length < 6) {
@@ -92,14 +92,20 @@ router.post('/login', async (req, res) => {
   username = username.trim();
   password = password.trim();
 
-  // Handle auto suffixing if not entered
-  let finalUsername = username;
-  if (!finalUsername.includes('@')) {
-    finalUsername += '@splitfriendly';
+  // Handle auto suffixing for login
+  let usernamesToTry = [username];
+  if (!username.includes('@')) {
+    usernamesToTry = [`${username}@fairshare`, `${username}@splitfriendly`];
   }
 
   try {
-    const rows = await db.query('SELECT id, username, password, unique_id, display_name, avatar_color, dob_day FROM users WHERE username = ?', [finalUsername]);
+    let rows;
+    if (usernamesToTry.length === 1) {
+      rows = await db.query('SELECT id, username, password, unique_id, display_name, avatar_color, dob_day FROM users WHERE username = ?', [usernamesToTry[0]]);
+    } else {
+      rows = await db.query('SELECT id, username, password, unique_id, display_name, avatar_color, dob_day FROM users WHERE username = ? OR username = ?', [usernamesToTry[0], usernamesToTry[1]]);
+    }
+    
     if (rows.length === 0) {
       return res.status(400).json({ error: 'Invalid username or password.' });
     }
