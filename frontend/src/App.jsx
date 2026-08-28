@@ -7,7 +7,7 @@ import UpdateBanner from './components/UpdateBanner';
 import { Menu, Wallet } from 'lucide-react';
 
 // Code-split all views — each is loaded only when the route is first visited
-const Login = lazy(() => import('./views/Login'));
+import Login from './views/Login';
 const Register = lazy(() => import('./views/Register'));
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const Expenses = lazy(() => import('./views/Expenses'));
@@ -93,7 +93,8 @@ function Layout() {
 }
 
 const RootRedirect = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return null;
   return user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
 };
 

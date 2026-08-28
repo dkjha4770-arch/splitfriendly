@@ -11,6 +11,10 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  if (useAuth().user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   useEffect(() => {
     // Send a request to wake/pre-warm database connection pool in the background
     fetch('/api/auth/wake').catch(err => {
