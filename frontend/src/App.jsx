@@ -1,6 +1,6 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import UpdateBanner from './components/UpdateBanner';
@@ -16,7 +16,7 @@ const Squads = lazy(() => import('./views/Squads'));
 const Profile = lazy(() => import('./views/Profile'));
 const Analytics = lazy(() => import('./views/Analytics'));
 const CommandCentre = lazy(() => import('./views/CommandCentre'));
-const Landing = lazy(() => import('./views/Landing'));
+// Landing removed
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
 const Settlements = lazy(() => import('./views/Settlements'));
 const SettlementDetails = lazy(() => import('./views/SettlementDetails'));
@@ -92,6 +92,11 @@ function Layout() {
   );
 }
 
+const RootRedirect = () => {
+  const { user } = useAuth();
+  return user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+};
+
 function App() {
   return (
     <BrowserRouter>
@@ -101,7 +106,7 @@ function App() {
         <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

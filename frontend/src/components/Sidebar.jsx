@@ -65,15 +65,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
       </Link>
 
       <nav className="sidebar-nav">
-        <NavLink 
-          to="/" 
-          end
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={handleOptionClick}
-        >
-          <Globe />
-          <span>Welcome Page</span>
-        </NavLink>
+        {/* Welcome Page link removed */}
 
         <NavLink 
           to="/dashboard" 
