@@ -1,52 +1,46 @@
 :root {
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-rgb: 99, 102, 241;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-rgb: 79, 70, 229;
   --btn-text-color: #ffffff;
-  --secondary: #22c55e;
-  --secondary-rgb: 34, 197, 94;
-  --accent-glow: #38bdf8;
-  --bg-color: #0b092b;
-  --sidebar-bg: rgba(26, 23, 68, 0.85);
-  --card-bg: rgba(26, 23, 68, 0.8);
-  --border-color: rgba(165, 180, 252, 0.35);
+  --secondary: #10b981;
+  --secondary-rgb: 16, 185, 129;
+  --accent-glow: transparent;
+  --bg-color: #0f172a;
+  --sidebar-bg: #1e293b;
+  --card-bg: #1e293b;
+  --border-color: #334155;
   --text-color: #f8fafc;
-  --text-dim: #cbd5e1;
-  --glass-bg: rgba(26, 23, 68, 0.82);
-  --glass-border: rgba(165, 180, 252, 0.35);
-  --shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  --clay-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  --input-bg: rgba(15, 12, 43, 0.85);
-  --gradient-bg:
-    radial-gradient(circle at 85% 15%, rgba(124, 58, 237, 0.4) 0px, transparent 45%),
-    radial-gradient(circle at 15% 85%, rgba(56, 189, 248, 0.25) 0px, transparent 40%),
-    linear-gradient(135deg, #0b092b 0%, #1a174d 50%, #120e36 100%);
+  --text-dim: #94a3b8;
+  --glass-bg: #0f172a;
+  --glass-border: #334155;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --clay-shadow: none;
+  --input-bg: #0f172a;
+  --gradient-bg: #0f172a;
   --sidebar-width: 250px;
 }
 
 [data-theme="light"] {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-rgb: 37, 99, 235;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-rgb: 79, 70, 229;
   --btn-text-color: #ffffff;
-  --secondary: #16a34a;
-  --secondary-rgb: 22, 163, 74;
-  --accent-glow: #0284c7;
-  --bg-color: #a5c4f7;
-  --sidebar-bg: rgba(255, 255, 255, 0.92);
-  --card-bg: rgba(255, 255, 255, 0.94);
-  --border-color: rgba(148, 163, 184, 0.45);
+  --secondary: #10b981;
+  --secondary-rgb: 16, 185, 129;
+  --accent-glow: transparent;
+  --bg-color: #f8fafc;
+  --sidebar-bg: #ffffff;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
   --text-color: #0f172a;
-  --text-dim: #334155;
-  --glass-bg: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(148, 163, 184, 0.5);
-  --shadow: 14px 14px 28px rgba(145, 175, 225, 0.35), -12px -12px 24px rgba(255, 255, 255, 0.9), inset 3px 3px 6px rgba(255, 255, 255, 0.9), inset -3px -3px 6px rgba(165, 195, 245, 0.25);
-  --clay-shadow: 10px 10px 20px rgba(145, 175, 225, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.85), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(165, 195, 245, 0.2);
-  --input-bg: rgba(241, 245, 249, 0.95);
-  --gradient-bg:
-    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 0px, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(165, 196, 247, 0.6) 0px, transparent 50%),
-    linear-gradient(135deg, #a5c4f7 0%, #cbdcfd 50%, #e2ecfe 100%);
+  --text-dim: #64748b;
+  --glass-bg: #f8fafc;
+  --glass-border: #e2e8f0;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --clay-shadow: none;
+  --input-bg: #ffffff;
+  --gradient-bg: #f8fafc;
 }
 
 * {
@@ -113,12 +107,12 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   line-height: 1.6;
-  background: var(--gradient-bg);
+  background: var(--bg-color);
   min-height: 100vh;
   display: flex;
   overflow-x: hidden;
   position: relative;
-  font-size: 17px;
+  font-size: 16px;
 }
 
 /* Cinematic Background Orbs Removed for Performance */
@@ -153,22 +147,18 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: 250px;
+  width: var(--sidebar-width);
   background: var(--sidebar-bg);
-  border: 2px solid rgba(148, 163, 184, 0.45);
-  border-radius: 32px;
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  padding: 2rem 1rem;
+  padding: 1.5rem 1rem;
   position: fixed;
-  top: 20px;
-  left: 20px;
-  height: calc(100vh - 40px);
+  top: 0;
+  left: 0;
+  height: 100vh;
   z-index: 1000;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s ease;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
@@ -200,9 +190,9 @@ body {
 
 .sidebar-logo {
   position: sticky;
-  top: -2rem;
-  margin-top: -2rem;
-  padding: 2rem 0.5rem 1.5rem 0.5rem;
+  top: -1.5rem;
+  margin-top: -1.5rem;
+  padding: 1.5rem 0.5rem 1.5rem 0.5rem;
   background: var(--sidebar-bg);
   z-index: 10;
   display: flex;
@@ -210,21 +200,19 @@ body {
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   text-decoration: none;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-logo .logo-badge,
 .mobile-nav-logo .logo-badge {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  box-shadow: 4px 4px 10px rgba(59, 130, 246, 0.3), inset 2px 2px 4px rgba(255, 255, 255, 0.4);
-  border: 1.5px solid #1d4ed8;
   flex-shrink: 0;
 }
 
@@ -253,12 +241,12 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border-radius: 14px;
+  border-radius: 8px;
   color: var(--text-color) !important;
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.95rem;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
   background: transparent;
@@ -284,29 +272,25 @@ body {
 
 
 .nav-item.active {
-  color: #ffffff !important;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border: 2px solid #1d4ed8;
-  border-radius: 50px;
-  box-shadow: 6px 6px 14px rgba(59, 130, 246, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(29, 78, 216, 0.3);
+  color: var(--primary) !important;
+  background: rgba(var(--primary-rgb), 0.1);
+  font-weight: 600;
 }
 
 .nav-item.active i,
 .nav-item.active svg {
-  color: #ffffff !important;
+  color: var(--primary) !important;
 }
 
 .nav-item.active::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 40%;
-  background: var(--btn-text-color);
+  top: 15%;
+  height: 70%;
+  width: 4px;
+  background: var(--primary);
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 5px var(--btn-text-color);
 }
 
 .sidebar-footer {
@@ -323,12 +307,10 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 0.8rem 1rem;
-  background: var(--card-bg);
-  border-radius: 20px;
+  background: transparent;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
-  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.05);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.2s ease;
   cursor: pointer;
   text-align: left;
   width: 100%;
@@ -387,18 +369,13 @@ body {
   flex-grow: 1;
   min-width: 0;
   max-width: 100%;
-  margin: 20px 20px 20px calc(var(--sidebar-width) + 40px);
-  background: var(--glass-bg);
-  border: 2px solid rgba(148, 163, 184, 0.45);
-  border-radius: 35px;
+  margin: 0 0 0 var(--sidebar-width);
+  background: var(--bg-color);
   padding: 2.5rem;
-  height: calc(100vh - 40px);
+  min-height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
   scrollbar-width: none;
 }
 
@@ -507,15 +484,12 @@ select option {
 
 .card {
   background: var(--card-bg);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   color: var(--text-color);
-  border-radius: 35px;
-  padding: 1.75rem;
+  border-radius: 12px;
+  padding: 1.5rem;
   box-shadow: var(--shadow);
-  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
 }
 
 .card h1,
@@ -528,9 +502,9 @@ select option {
 }
 
 .card:hover {
-  border-color: rgba(var(--primary-rgb), 0.35);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: var(--border-color);
+  transform: none;
+  box-shadow: var(--shadow);
 }
 
 
@@ -547,15 +521,14 @@ select option {
   align-items: center;
   gap: 1.25rem;
   background: var(--card-bg);
-  border-radius: 28px;
+  border-radius: 12px;
   padding: 1.2rem 1.5rem;
-  border: 2px solid var(--border-color);
-  box-shadow: var(--clay-shadow);
-  transition: all 0.35s ease;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
 }
 
 .stat-card:hover {
-  border-color: var(--primary);
+  border-color: var(--border-color);
 }
 
 .stat-icon {
@@ -616,12 +589,12 @@ textarea,
 .form-control {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
-  padding: 0.8rem 1.1rem;
-  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
   color: var(--text-color);
   font-size: 0.95rem;
   width: 100%;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   outline: none;
 }
 
@@ -641,43 +614,33 @@ textarea:focus {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: var(--primary);
   color: #ffffff;
-  padding: 0.85rem 1.6rem;
-  border-radius: 50px;
-  border: 2px solid #1d4ed8;
-  font-weight: 800;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 6px 6px 16px rgba(59, 130, 246, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(29, 78, 216, 0.3);
   margin-top: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 .btn-glass {
   background: var(--card-bg);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   color: var(--text-color);
-  padding: 0.8rem 1.4rem;
-  border-radius: 50px;
-  font-weight: 800;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--clay-shadow);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 .btn-primary:hover {
