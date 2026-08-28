@@ -1,10 +1,10 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, Link, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import UpdateBanner from './components/UpdateBanner';
-import { Menu, Wallet } from 'lucide-react';
+import { Menu, Wallet, Bell, LayoutDashboard, Users, Activity, User, Plus } from 'lucide-react';
 
 // Code-split all views — each is loaded only when the route is first visited
 const Login        = lazy(() => import('./views/Login'));
@@ -44,12 +44,16 @@ const PageLoader = () => (
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const { user } = useAuth();
+
+  const currentPath = location.pathname;
 
   return (
     <div className={`dashboard-layout ${sidebarOpen ? 'sidebar-open' : ''}`}>
       <div className="bg-orb-3"></div>
       
-      {/* Sidebar */}
+      {/* Sidebar - Desktop Only in new design */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       {/* Mobile overlay */}
@@ -58,36 +62,56 @@ function Layout() {
         onClick={() => setSidebarOpen(false)}
       ></div>
 
-      {/* Mobile Top Navigation Bar */}
-      <div className="mobile-top-nav">
-        <button 
-          className="mobile-menu-toggle-btn" 
-          onClick={() => setSidebarOpen(true)}
-        >
-          <Menu size={20} />
-        </button>
-        <div className="mobile-nav-logo">
-          <div className="logo-badge"><Wallet size={18} /></div>
-          <span className="logo-text">Split<span style={{ color: 'var(--primary)' }}>Friendly</span></span>
+      {/* Mobile Top Navigation Bar (Redesigned) */}
+      <div className="mobile-top-nav redesigned">
+        <div className="top-nav-avatar">
+          {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
         </div>
+        <div className="top-nav-title">
+          Split-Friendly
+        </div>
+        <button className="top-nav-bell">
+          <Bell size={22} />
+        </button>
       </div>
 
       {/* Main Content Pane */}
-      <main className="main-content">
-        {/* Global style to show mobile menu button when width <= 1024px */}
-        <style>{`
-          @media (max-width: 1024px) {
-            .mobile-menu-toggle-btn {
-              display: flex !important;
-            }
-            .main-content {
-              padding-top: 5.5rem !important;
-            }
-          }
-        `}</style>
-        
+      <main className="main-content redesigned-main">
         <Outlet />
       </main>
+
+      {/* Mobile FAB */}
+      <Link to="/expenses/new" className="mobile-fab">
+        <Plus size={24} />
+      </Link>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="mobile-bottom-nav">
+        <Link to="/dashboard" className={`bottom-nav-item ${currentPath === '/dashboard' ? 'active' : ''}`}>
+          <div className="nav-icon-container">
+            <LayoutDashboard size={20} />
+            <span className="nav-label">Dashboard</span>
+          </div>
+        </Link>
+        <Link to="/squads" className={`bottom-nav-item ${currentPath === '/squads' ? 'active' : ''}`}>
+          <div className="nav-icon-container">
+            <Users size={20} />
+            <span className="nav-label">Groups</span>
+          </div>
+        </Link>
+        <Link to="/expenses" className={`bottom-nav-item ${currentPath === '/expenses' ? 'active' : ''}`}>
+          <div className="nav-icon-container">
+            <Activity size={20} />
+            <span className="nav-label">Activity</span>
+          </div>
+        </Link>
+        <Link to="/profile" className={`bottom-nav-item ${currentPath === '/profile' ? 'active' : ''}`}>
+          <div className="nav-icon-container">
+            <User size={20} />
+            <span className="nav-label">Profile</span>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
