@@ -56,7 +56,7 @@ export const Login = () => {
         {/* Brand Header */}
         <div className="login-brand-header">
           <div className="login-brand-icon-wrap">
-            <Wallet size={36} color="#ffffff" strokeWidth={2.4} />
+            <Wallet size={26} color="#ffffff" strokeWidth={2.4} />
           </div>
           <h1 className="login-brand-title">FAIRSHARE</h1>
           <p className="login-brand-subtitle">Financial Ledger & Expense Intelligence</p>
@@ -69,7 +69,7 @@ export const Login = () => {
         {/* Error Alert */}
         {error && (
           <div className="login-error-alert" role="alert">
-            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
@@ -80,10 +80,10 @@ export const Login = () => {
           <div className="login-form-group">
             <label className="login-form-label">
               <span>Username Handle</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'none' }}>Unique identifier</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'none' }}>Unique identifier</span>
             </label>
             <div className="login-input-wrapper">
-              <User size={18} className="login-input-icon" />
+              <User size={16} className="login-input-icon" />
               <input 
                 type="text" 
                 className="login-input-field"
@@ -97,14 +97,14 @@ export const Login = () => {
             </div>
             {username && !username.includes('@') && (
               <div className="login-username-hint">
-                <Sparkles size={12} style={{ color: 'var(--primary)' }} />
+                <Sparkles size={11} style={{ color: 'var(--primary)' }} />
                 <span>Signing in as: <strong>{username.trim()}@fairshare</strong></span>
               </div>
             )}
           </div>
 
           {/* Password Field */}
-          <div className="login-form-group" style={{ marginBottom: '1.75rem' }}>
+          <div className="login-form-group">
             <div className="login-form-label">
               <span>Secret Key / Password</span>
               <Link to="/forgot-password" className="login-recovery-link" tabIndex={-1}>
@@ -112,7 +112,7 @@ export const Login = () => {
               </Link>
             </div>
             <div className="login-input-wrapper">
-              <Lock size={18} className="login-input-icon" />
+              <Lock size={16} className="login-input-icon" />
               <input 
                 type={showPassword ? 'text' : 'password'} 
                 className="login-input-field"
@@ -121,7 +121,7 @@ export const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                style={{ paddingRight: '2.85rem' }}
+                style={{ paddingRight: '2.5rem' }}
               />
               <button
                 type="button"
@@ -130,7 +130,7 @@ export const Login = () => {
                 title={showPassword ? 'Hide password' : 'Show password'}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
@@ -148,9 +148,9 @@ export const Login = () => {
               </>
             ) : (
               <>
-                <KeyRound size={18} />
+                <KeyRound size={16} />
                 <span>Sign In To Ledger</span>
-                <ArrowRight size={16} style={{ marginLeft: '0.2rem' }} />
+                <ArrowRight size={15} style={{ marginLeft: '0.15rem' }} />
               </>
             )}
           </button>
@@ -173,7 +173,7 @@ export const Login = () => {
 
         {/* Feature Highlights Pill */}
         <div className="login-features-pill">
-          <span><ShieldCheck size={13} style={{ color: 'var(--primary)' }} /> Auto-Reconciliation</span>
+          <span><ShieldCheck size={12} style={{ color: 'var(--primary)' }} /> Auto-Reconciliation</span>
           <span className="login-features-divider"></span>
           <span>Bilateral Ledgers</span>
           <span className="login-features-divider"></span>
