@@ -261,40 +261,45 @@
 .ledger-controls-panel {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 1.25rem;
+  border-radius: 18px;
+  padding: 1.15rem 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(12px);
+  gap: 0.9rem;
+  box-shadow: var(--shadow);
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* ── ROW 1: PRIMARY TOOLBAR ── */
 .ledger-controls-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 0.85rem;
+  width: 100%;
 }
 
+/* Search Box: Exactly Height 40px */
 .ledger-search-box {
   position: relative;
   display: flex;
   align-items: center;
   flex: 1 1 260px;
-  min-width: 220px;
+  min-width: 180px;
+  max-width: 440px;
   background: var(--input-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 0 0.85rem;
-  height: 42px;
+  height: 40px;
+  box-sizing: border-box;
   transition: all 0.2s ease;
 }
 
 .ledger-search-box:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.2);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.15);
 }
 
 .ledger-search-input {
@@ -303,8 +308,9 @@
   border: none;
   outline: none;
   color: var(--text-color);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   padding-left: 0.6rem;
+  height: 100%;
 }
 
 .ledger-search-clear {
@@ -324,22 +330,39 @@
   color: var(--text-color);
 }
 
+.ledger-search-box:hover,
+.ledger-month-stepper:hover,
+.ledger-sort-select:hover,
+.ledger-segment-group:hover {
+  border-color: rgba(125, 125, 125, 0.35);
+}
+
+/* Actions Group: Exactly Height 40px aligned toolbelt */
 .ledger-controls-actions-group {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  flex-wrap: wrap;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
-/* Month Stepper */
+/* Month Stepper: Exactly Height 40px */
 .ledger-month-stepper {
   display: inline-flex;
   align-items: center;
   background: var(--input-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 2px 4px;
-  height: 42px;
+  border-radius: 10px;
+  padding: 0 4px;
+  height: 40px;
+  box-sizing: border-box;
+  gap: 2px;
+  transition: all 0.2s ease;
+}
+
+.ledger-month-stepper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.15);
 }
 
 .month-stepper-btn {
@@ -347,16 +370,18 @@
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  padding: 0.4rem;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .month-stepper-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(125, 125, 125, 0.1);
   color: var(--text-color);
 }
 
@@ -365,11 +390,14 @@
   border: none;
   outline: none;
   color: var(--text-color);
-  font-size: 0.825rem;
+  font-size: 0.84rem;
   font-weight: 700;
   padding: 0 0.5rem;
   cursor: pointer;
   text-align: center;
+  height: 30px;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .month-stepper-select option {
@@ -377,15 +405,48 @@
   color: var(--text-color);
 }
 
-/* View Mode & Sort Segment Controls */
+/* Sort Selector: Exactly Height 40px */
+.ledger-sort-select {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 10px;
+  padding: 0 2.2rem 0 0.9rem;
+  height: 40px;
+  box-sizing: border-box;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  transition: border-color 0.2s ease;
+}
+
+.ledger-sort-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.15);
+}
+
+.ledger-sort-select option {
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+
+/* View Mode Segment Toggle: Exactly Height 40px */
 .ledger-segment-group {
   display: inline-flex;
   align-items: center;
   background: var(--input-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 3px;
-  height: 42px;
+  height: 40px;
+  box-sizing: border-box;
+  gap: 3px;
 }
 
 .ledger-segment-btn {
@@ -393,14 +454,16 @@
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  padding: 0.45rem 0.65rem;
-  border-radius: 9px;
+  height: 32px;
+  padding: 0 0.85rem;
+  border-radius: 7px;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   font-size: 0.8rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .ledger-segment-btn:hover {
@@ -409,91 +472,88 @@
 
 .ledger-segment-btn.active {
   background: var(--card-bg);
-  color: var(--text-color);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-.ledger-sort-select {
-  background: var(--input-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  border-radius: 12px;
-  padding: 0 0.75rem;
-  height: 42px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  outline: none;
-}
-
-.ledger-sort-select option {
-  background: var(--card-bg);
-  color: var(--text-color);
-}
-
-/* Filter Chips Bar (Category + Scope) */
+/* ── ROW 2: CATEGORY CHIPS & PAYER TABS ── */
 .ledger-filter-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .ledger-category-chips {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.ledger-category-chips::-webkit-scrollbar {
+  display: none;
 }
 
 .ledger-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.35rem 0.85rem;
+  height: 32px;
+  padding: 0 0.85rem;
   border-radius: 50px;
   font-size: 0.775rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(125, 125, 125, 0.05);
   color: var(--text-dim);
   border: 1px solid var(--border-color);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
   user-select: none;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .ledger-chip:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(125, 125, 125, 0.1);
   color: var(--text-color);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(125, 125, 125, 0.25);
 }
 
 .ledger-chip.active {
-  background: rgba(var(--primary-rgb, 79, 70, 229), 0.15);
+  background: rgba(var(--primary-rgb, 79, 70, 229), 0.12);
   color: var(--primary);
   border-color: var(--primary);
-  box-shadow: 0 0 12px rgba(var(--primary-rgb, 79, 70, 229), 0.25);
+  box-shadow: 0 0 10px rgba(var(--primary-rgb, 79, 70, 229), 0.2);
 }
 
 .ledger-chip-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .ledger-chip-count {
   font-size: 0.7rem;
-  padding: 1px 6px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(125, 125, 125, 0.12);
   color: inherit;
   font-weight: 800;
 }
 
+/* Payer Segment Tabs: Exactly Height 32px */
 .ledger-payer-tabs {
   display: inline-flex;
   align-items: center;
@@ -501,6 +561,10 @@
   border: 1px solid var(--border-color);
   border-radius: 50px;
   padding: 3px;
+  height: 32px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  gap: 2px;
 }
 
 .ledger-payer-tab {
@@ -509,15 +573,25 @@
   color: var(--text-dim);
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.3rem 0.75rem;
+  height: 24px;
+  padding: 0 0.8rem;
   border-radius: 50px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ledger-payer-tab:hover {
+  color: var(--text-color);
 }
 
 .ledger-payer-tab.active {
   background: var(--primary);
   color: #ffffff;
+  box-shadow: 0 1px 4px rgba(var(--primary-rgb, 79, 70, 229), 0.35);
 }
 
 /* --------------------------------------------------------------------------
@@ -1129,14 +1203,25 @@
   .ledger-controls-top-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .ledger-search-box {
+    width: 100%;
+    max-width: 100%;
   }
 
   .ledger-controls-actions-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
   }
 
   .ledger-month-stepper {
-    flex: 1;
+    flex: 1 1 auto;
     justify-content: space-between;
   }
 }
@@ -1204,7 +1289,9 @@
 
   .ledger-search-box {
     width: 100%;
+    max-width: 100%;
     min-width: unset;
+    height: 40px;
   }
 
   .ledger-controls-actions-group {
@@ -1217,16 +1304,19 @@
   .ledger-month-stepper {
     flex: 1 1 100%;
     justify-content: space-between;
+    height: 40px;
   }
 
   .ledger-sort-select {
     flex: 1;
     min-width: 120px;
     font-size: 0.78rem;
+    height: 40px;
   }
 
   .ledger-segment-group {
     flex-shrink: 0;
+    height: 40px;
   }
 
   .ledger-filter-row {
@@ -1250,21 +1340,31 @@
 
   .ledger-chip {
     flex-shrink: 0;
-    font-size: 0.72rem;
-    padding: 0.3rem 0.7rem;
+    font-size: 0.74rem;
+    height: 32px;
+    padding: 0 0.75rem;
+    box-sizing: border-box;
   }
 
   .ledger-payer-tabs {
     width: 100%;
     display: flex;
     justify-content: space-between;
+    height: 32px;
+    box-sizing: border-box;
+    padding: 3px;
   }
 
   .ledger-payer-tab {
     flex: 1;
     text-align: center;
-    font-size: 0.72rem;
-    padding: 0.35rem 0.5rem;
+    font-size: 0.74rem;
+    height: 24px;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Table horizontal scroll preservation with minimum width */
