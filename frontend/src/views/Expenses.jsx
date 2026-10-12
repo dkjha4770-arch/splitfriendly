@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
 import { getExpensesData, getCachedExpensesData, invalidateExpensesCache } from '../utils/dataCache';
+import './Expenses.css';
 import { 
   Plus, 
   Download, 
@@ -11,7 +12,19 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Info
+  Info,
+  List,
+  LayoutGrid,
+  ArrowUpDown,
+  Wallet,
+  CreditCard,
+  PieChart,
+  Users,
+  X,
+  AlertTriangle,
+  Receipt,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 
 const CATEGORIES = {
@@ -23,16 +36,16 @@ const CATEGORIES = {
 };
 
 const PAYMENT_APPS = {
-  gpay: { label: 'Google Pay', badge: 'badge-purple' },
-  phonepe: { label: 'PhonePe', badge: 'badge-purple' },
-  slice: { label: 'Slice Card', badge: 'badge-green' },
-  cash: { label: 'Cash Reserve', badge: 'badge-green' },
-  upi: { label: 'UPI Direct', badge: 'badge-purple' }
+  gpay: { label: 'Google Pay', badge: 'app-badge-purple' },
+  phonepe: { label: 'PhonePe', badge: 'app-badge-purple' },
+  slice: { label: 'Slice Card', badge: 'app-badge-green' },
+  cash: { label: 'Cash Reserve', badge: 'app-badge-green' },
+  upi: { label: 'UPI Direct', badge: 'app-badge-purple' }
 };
 
 export const Expenses = () => {
   const { user, token } = useAuth();
-  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+  const authHeaders = useMemo(() => (token ? { 'Authorization': `Bearer ${token}` } : {}), [token]);
   
   // Data State — restored instantly from cache if available
   const initialCache = getCachedExpensesData();
@@ -50,23 +63,30 @@ export const Expenses = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [payerFilter, setPayerFilter] = useState('all'); // 'all', 'me', 'others'
+  const [sortBy, setSortBy] = useState('date-desc'); // 'date-desc', 'date-asc', 'amount-desc', 'amount-asc'
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
 
   // Modal State for Confirm Delete
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     id: null
   });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Populate month list (last 24 months)
-  const monthOptions = [];
-  const today = new Date();
-  for (let i = 0; i < 24; i++) {
-    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-    monthOptions.push({ value: `${yyyy}-${mm}`, label });
-  }
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const today = new Date();
+    for (let i = 0; i < 24; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+      options.push({ value: `${yyyy}-${mm}`, label });
+    }
+    return options;
+  }, []);
 
   // Fetch Expenses + Squads (using SWR dataCache)
   const fetchExpenses = useCallback(async (forceRefresh = false) => {
@@ -83,8 +103,7 @@ export const Expenses = () => {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [authHeaders]);
 
   useEffect(() => {
     if (token) {
@@ -105,25 +124,23 @@ export const Expenses = () => {
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
 
   // Build set of squad names the current user belongs to
-  const mySquadNames = new Set(
-    squads
-      .filter(s => {
-        try {
-          const mems = typeof s.members === 'string' ? JSON.parse(s.members || '[]') : s.members;
-          if (Array.isArray(mems)) return mems.some(m => String(m).toLowerCase() === myHandle);
-          if (mems && typeof mems === 'object') return Object.keys(mems).some(k => k.toLowerCase() === myHandle);
-        } catch (_) { /* ignore */ }
-        return false;
-      })
-      .map(s => s.name)
-  );
+  const mySquadNames = useMemo(() => {
+    return new Set(
+      squads
+        .filter(s => {
+          try {
+            const mems = typeof s.members === 'string' ? JSON.parse(s.members || '[]') : s.members;
+            if (Array.isArray(mems)) return mems.some(m => String(m).toLowerCase() === myHandle);
+            if (mems && typeof mems === 'object') return Object.keys(mems).some(k => k.toLowerCase() === myHandle);
+          } catch (_) { /* ignore */ }
+          return false;
+        })
+        .map(s => s.name)
+    );
+  }, [squads, myHandle]);
 
   // Helper: check if the current user is relevant to this expense
-  // True when:
-  //  1. User is the payer, OR
-  //  2. User is explicitly in the members list, OR
-  //  3. Expense belongs to a squad the user is a member of
-  const isMyExpense = (e) => {
+  const isMyExpense = useCallback((e) => {
     // 1. I am the payer
     if ((e.payer || '').toLowerCase() === myHandle) return true;
 
@@ -144,23 +161,135 @@ export const Expenses = () => {
     if (e.squad_name && mySquadNames.has(e.squad_name)) return true;
 
     return false;
+  }, [myHandle, mySquadNames]);
+
+  // Helper: parse members cleanly
+  const parseMembers = (members) => {
+    try {
+      const parsed = typeof members === 'string' ? JSON.parse(members || '[]') : members;
+      if (Array.isArray(parsed)) {
+        return parsed.map(m => String(m));
+      } else if (parsed && typeof parsed === 'object') {
+        return Object.keys(parsed).map(k => String(k));
+      }
+    } catch (_) {
+      return members ? [String(members)] : [];
+    }
+    return [];
   };
 
+  // Helper: Calculate user's share for an expense
+  const getMyShare = useCallback((e) => {
+    if (!e.members) return 0;
+    try {
+      const parsed = typeof e.members === 'string' ? JSON.parse(e.members || '[]') : e.members;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        if (parsed[myHandle] !== undefined) return Number(parsed[myHandle]);
+      } else if (Array.isArray(parsed)) {
+        if (parsed.some(m => String(m).toLowerCase() === myHandle)) {
+          return Number(e.share) || (Number(e.amount) / (parsed.length || 1));
+        }
+      }
+    } catch (_) {}
+    return 0;
+  }, [myHandle]);
+
   // Filtered lists (excluding settlements, scoped to current user's expenses)
-  const monthlyExpenses = expenses.filter(e =>
-    e.date.substring(0, 7) === selectedMonth &&
-    e.category !== 'settlement' &&
-    isMyExpense(e)
-  );
-  const filteredExpenses = monthlyExpenses.filter(e => {
-    const matchesSearch = 
-      e.where_spent.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.payer.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
-    
-    return matchesSearch && matchesCategory;
-  });
+  const monthlyExpenses = useMemo(() => {
+    return expenses.filter(e =>
+      e.date.substring(0, 7) === selectedMonth &&
+      e.category !== 'settlement' &&
+      isMyExpense(e)
+    );
+  }, [expenses, selectedMonth, isMyExpense]);
+
+  // Apply search, category, payer, and sorting
+  const filteredExpenses = useMemo(() => {
+    let result = monthlyExpenses.filter(e => {
+      const matchesSearch = 
+        e.where_spent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        e.payer.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
+
+      const payerLower = (e.payer || '').toLowerCase();
+      const matchesPayer = 
+        payerFilter === 'all' ||
+        (payerFilter === 'me' && payerLower === myHandle) ||
+        (payerFilter === 'others' && payerLower !== myHandle);
+      
+      return matchesSearch && matchesCategory && matchesPayer;
+    });
+
+    // Sorting
+    result.sort((a, b) => {
+      if (sortBy === 'date-desc') {
+        return new Date(b.date) - new Date(a.date) || b.id - a.id;
+      }
+      if (sortBy === 'date-asc') {
+        return new Date(a.date) - new Date(b.date) || a.id - b.id;
+      }
+      if (sortBy === 'amount-desc') {
+        return Number(b.amount) - Number(a.amount);
+      }
+      if (sortBy === 'amount-asc') {
+        return Number(a.amount) - Number(b.amount);
+      }
+      return 0;
+    });
+
+    return result;
+  }, [monthlyExpenses, searchQuery, categoryFilter, payerFilter, sortBy, myHandle]);
+
+  // Category counts within the current month
+  const categoryCounts = useMemo(() => {
+    const counts = { all: monthlyExpenses.length };
+    Object.keys(CATEGORIES).forEach(k => { counts[k] = 0; });
+    monthlyExpenses.forEach(e => {
+      if (counts[e.category] !== undefined) {
+        counts[e.category] += 1;
+      }
+    });
+    return counts;
+  }, [monthlyExpenses]);
+
+  // Aggregate Metrics for Top Stats Cards
+  const stats = useMemo(() => {
+    let totalSpent = 0;
+    let myPaid = 0;
+    let myShare = 0;
+    const catAmounts = {};
+
+    monthlyExpenses.forEach(e => {
+      const amt = Number(e.amount) || 0;
+      totalSpent += amt;
+
+      if ((e.payer || '').toLowerCase() === myHandle) {
+        myPaid += amt;
+      }
+
+      myShare += getMyShare(e);
+
+      catAmounts[e.category] = (catAmounts[e.category] || 0) + amt;
+    });
+
+    let topCatKey = null;
+    let maxCatAmt = 0;
+    for (const [k, v] of Object.entries(catAmounts)) {
+      if (v > maxCatAmt) {
+        maxCatAmt = v;
+        topCatKey = k;
+      }
+    }
+
+    return {
+      totalSpent,
+      myPaid,
+      myShare,
+      count: monthlyExpenses.length,
+      topCategory: topCatKey ? CATEGORIES[topCatKey]?.label : 'None'
+    };
+  }, [monthlyExpenses, myHandle, getMyShare]);
 
   // Delete Handlers
   const triggerDelete = (id) => {
@@ -171,6 +300,8 @@ export const Expenses = () => {
   };
 
   const executeDelete = async () => {
+    if (!deleteModal.id) return;
+    setIsDeleting(true);
     try {
       const res = await fetch('/api/expenses/delete', {
         method: 'POST',
@@ -188,6 +319,8 @@ export const Expenses = () => {
       fetchExpenses(true);
     } catch (err) {
       alert('Delete failed: ' + err.message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -196,152 +329,419 @@ export const Expenses = () => {
     window.open('/api/expenses/export', '_blank');
   };
 
+  // Find expense item being deleted for preview in modal
+  const itemToDelete = useMemo(() => {
+    if (!deleteModal.id) return null;
+    return expenses.find(e => e.id === deleteModal.id);
+  }, [deleteModal.id, expenses]);
+
+  // Selected month label
+  const currentMonthLabel = useMemo(() => {
+    const opt = monthOptions.find(o => o.value === selectedMonth);
+    return opt ? opt.label : selectedMonth;
+  }, [monthOptions, selectedMonth]);
+
   return (
-    <div className="view-section">
-      {/* Header */}
-      <header className="content-header">
-        <div className="header-title">
-          <h2>Ledger Logs</h2>
-          <p>Operative archives of tracking events.</p>
+    <div className="view-section expenses-container">
+      {/* Redesigned Header */}
+      <header className="ledger-header">
+        <div className="ledger-title-area">
+          <div className="ledger-title-badge-row">
+            <h2>
+              <Receipt size={24} style={{ color: 'var(--primary)' }} />
+              Expense Ledger
+            </h2>
+            <div className="ledger-status-pill">
+              <span className="ledger-status-dot"></span>
+              <span>{currentMonthLabel}</span>
+            </div>
+          </div>
+          <p className="ledger-subtitle">
+            Comprehensive audit record of all operative missions, squad allocations & expenditures.
+          </p>
         </div>
-        <div className="header-actions">
-          <div className="search-bar">
-            <Search size={16} style={{ color: 'var(--text-dim)' }} />
-            <input 
-              type="text" 
-              placeholder="Search objective/payer..." 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '50px', padding: '2px 8px' }}>
-            <button className="btn-delete" style={{ padding: '6px' }} onClick={() => navigateMonth(-1)}>
-              <ChevronLeft size={16} />
-            </button>
-            <select 
-              className="month-selector"
-              style={{ border: 'none !important', background: 'none !important', padding: '0.4rem 1rem !important', margin: 0 }}
-              value={selectedMonth}
-              onChange={e => setSelectedMonth(e.target.value)}
-            >
-              {monthOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-            <button className="btn-delete" style={{ padding: '6px' }} onClick={() => navigateMonth(1)}>
-              <ChevronRight size={16} />
-            </button>
-          </div>
-
-          <button className="btn-glass" onClick={handleExport}>
+        <div className="ledger-header-actions">
+          <button className="btn-export-csv" onClick={handleExport} title="Download entire ledger in CSV format">
             <Download size={16} />
             <span>Export CSV</span>
           </button>
 
-          <Link to="/expenses/new" className="btn-glass" style={{ textDecoration: 'none', background: 'var(--primary)', color: 'var(--btn-text-color)', border: 'none' }}>
-            <Plus size={16} />
+          <Link to="/expenses/new" className="btn-log-expense-primary">
+            <Plus size={17} />
             <span>Log Expense</span>
           </Link>
         </div>
       </header>
 
-      {/* Main Panel */}
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Missions Ledger Summary</h3>
-          <div className="filter-chips">
+      {/* Quick Summary Metrics Grid */}
+      <div className="ledger-metrics-grid">
+        <div className="ledger-metric-card">
+          <div className="ledger-metric-header">
+            <span className="ledger-metric-label">Total Volume</span>
+            <div className="ledger-metric-icon-wrap icon-wrap-primary">
+              <Wallet size={18} />
+            </div>
+          </div>
+          <div className="ledger-metric-value-wrap">
+            <div className="ledger-metric-value">
+              ₹ {stats.totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <span className="ledger-metric-subtext">Across {stats.count} recorded missions this month</span>
+          </div>
+        </div>
+
+        <div className="ledger-metric-card">
+          <div className="ledger-metric-header">
+            <span className="ledger-metric-label">Paid by You</span>
+            <div className="ledger-metric-icon-wrap icon-wrap-green">
+              <CreditCard size={18} />
+            </div>
+          </div>
+          <div className="ledger-metric-value-wrap">
+            <div className="ledger-metric-value" style={{ color: '#10b981' }}>
+              ₹ {stats.myPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <span className="ledger-metric-subtext">Direct out-of-pocket fronting</span>
+          </div>
+        </div>
+
+        <div className="ledger-metric-card">
+          <div className="ledger-metric-header">
+            <span className="ledger-metric-label">Your Net Share</span>
+            <div className="ledger-metric-icon-wrap icon-wrap-cyan">
+              <Users size={18} />
+            </div>
+          </div>
+          <div className="ledger-metric-value-wrap">
+            <div className="ledger-metric-value" style={{ color: '#0ea5e9' }}>
+              ₹ {stats.myShare.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <span className="ledger-metric-subtext">Your allocated obligation</span>
+          </div>
+        </div>
+
+        <div className="ledger-metric-card">
+          <div className="ledger-metric-header">
+            <span className="ledger-metric-label">Leading Category</span>
+            <div className="ledger-metric-icon-wrap icon-wrap-amber">
+              <PieChart size={18} />
+            </div>
+          </div>
+          <div className="ledger-metric-value-wrap">
+            <div className="ledger-metric-value" style={{ fontSize: '1.25rem' }}>
+              {stats.topCategory}
+            </div>
+            <span className="ledger-metric-subtext">Primary area of capital allocation</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Interactive Controls & Filters Panel */}
+      <div className="ledger-controls-panel">
+        <div className="ledger-controls-top-row">
+          {/* Search Box */}
+          <div className="ledger-search-box">
+            <Search size={16} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
+            <input 
+              type="text" 
+              className="ledger-search-input"
+              placeholder="Search mission objective or payer..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button 
+                className="ledger-search-clear" 
+                onClick={() => setSearchQuery('')}
+                title="Clear search"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          <div className="ledger-controls-actions-group">
+            {/* Month Stepper */}
+            <div className="ledger-month-stepper">
+              <button 
+                className="month-stepper-btn" 
+                onClick={() => navigateMonth(-1)}
+                title="Previous month"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <Calendar size={14} style={{ color: 'var(--text-dim)', marginLeft: '4px' }} />
+              <select 
+                className="month-stepper-select"
+                value={selectedMonth}
+                onChange={e => setSelectedMonth(e.target.value)}
+              >
+                {monthOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <button 
+                className="month-stepper-btn" 
+                onClick={() => navigateMonth(1)}
+                title="Next month"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
+            {/* Sort Selector */}
+            <select 
+              className="ledger-sort-select"
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              title="Sort entries"
+            >
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Amount: High to Low</option>
+              <option value="amount-asc">Amount: Low to High</option>
+            </select>
+
+            {/* View Mode Toggle */}
+            <div className="ledger-segment-group">
+              <button 
+                className={`ledger-segment-btn ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+                title="Table View"
+              >
+                <List size={15} />
+                <span>Table</span>
+              </button>
+              <button 
+                className={`ledger-segment-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Card View"
+              >
+                <LayoutGrid size={15} />
+                <span>Cards</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Row: Category Chips & Payer Tabs */}
+        <div className="ledger-filter-row">
+          <div className="ledger-category-chips">
             <span 
-              className={`chip ${categoryFilter === 'all' ? 'active' : ''}`}
+              className={`ledger-chip ${categoryFilter === 'all' ? 'active' : ''}`}
               onClick={() => setCategoryFilter('all')}
             >
               All Ops
+              <span className="ledger-chip-count">{categoryCounts.all}</span>
             </span>
             {Object.keys(CATEGORIES).map(k => (
               <span 
                 key={k} 
-                className={`chip ${categoryFilter === k ? 'active' : ''}`}
+                className={`ledger-chip ${categoryFilter === k ? 'active' : ''}`}
                 onClick={() => setCategoryFilter(k)}
               >
+                <span 
+                  className="ledger-chip-dot" 
+                  style={{ background: CATEGORIES[k].color }}
+                />
                 {CATEGORIES[k].label}
+                <span className="ledger-chip-count">{categoryCounts[k] || 0}</span>
               </span>
             ))}
           </div>
-        </div>
 
-        {loading ? (
-          <p style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-dim)' }}>Loading archives...</p>
-        ) : filteredExpenses.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem' }}>
-            <Info size={40} style={{ color: 'var(--text-dim)', marginBottom: '1rem', opacity: 0.5 }} />
-            <h4 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.25rem' }}>No Entries Registered</h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No matching operational entries exist for selected segment.</p>
+          <div className="ledger-payer-tabs">
+            <button 
+              className={`ledger-payer-tab ${payerFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setPayerFilter('all')}
+            >
+              All Payers
+            </button>
+            <button 
+              className={`ledger-payer-tab ${payerFilter === 'me' ? 'active' : ''}`}
+              onClick={() => setPayerFilter('me')}
+            >
+              Paid by You
+            </button>
+            <button 
+              className={`ledger-payer-tab ${payerFilter === 'others' ? 'active' : ''}`}
+              onClick={() => setPayerFilter('others')}
+            >
+              Paid by Others
+            </button>
           </div>
-        ) : (
-          <div className="table-wrapper">
-            <table>
+        </div>
+      </div>
+
+      {/* Main Ledger Content */}
+      {loading ? (
+        <div className="ledger-card-table-wrap">
+          <div className="ledger-loading-container">
+            <div className="skeleton-row" style={{ width: '40%' }}></div>
+            <div className="skeleton-row" style={{ width: '100%' }}></div>
+            <div className="skeleton-row" style={{ width: '100%' }}></div>
+            <div className="skeleton-row" style={{ width: '100%' }}></div>
+            <div className="skeleton-row" style={{ width: '90%' }}></div>
+          </div>
+        </div>
+      ) : filteredExpenses.length === 0 ? (
+        <div className="ledger-empty-state">
+          <div className="empty-state-icon-circle">
+            <Receipt size={32} />
+          </div>
+          <h4>No Ledger Entries Found</h4>
+          <p>
+            {searchQuery || categoryFilter !== 'all' || payerFilter !== 'all'
+              ? 'No matching expenses found for the active filter set in ' + currentMonthLabel + '.'
+              : 'No operational expenses have been recorded for ' + currentMonthLabel + ' yet.'}
+          </p>
+          <div className="empty-state-actions">
+            {(searchQuery || categoryFilter !== 'all' || payerFilter !== 'all') && (
+              <button 
+                className="btn-export-csv"
+                onClick={() => {
+                  setSearchQuery('');
+                  setCategoryFilter('all');
+                  setPayerFilter('all');
+                }}
+              >
+                Reset Filters
+              </button>
+            )}
+            <Link to="/expenses/new" className="btn-log-expense-primary">
+              <Plus size={16} />
+              <span>Log First Expense</span>
+            </Link>
+          </div>
+        </div>
+      ) : viewMode === 'table' ? (
+        /* Redesigned Table View */
+        <div className="ledger-card-table-wrap">
+          <div className="ledger-table-header-info">
+            <h3>
+              <Layers size={18} style={{ color: 'var(--primary)' }} />
+              Operational Ledger Records
+            </h3>
+            <span className="ledger-count-tag">
+              Showing {filteredExpenses.length} of {monthlyExpenses.length} entries
+            </span>
+          </div>
+
+          <div className="ledger-table-scroll-container">
+            <table className="ledger-table">
               <thead>
                 <tr>
-                  <th>Execution Date</th>
-                  <th>Added On</th>
+                  <th>Date & Time</th>
                   <th>Mission Objective</th>
                   <th>Payer</th>
-                  <th>Category Scope</th>
-                  <th>Pay App Channel</th>
+                  <th>Category</th>
+                  <th>Channel</th>
                   <th>Group Share Details</th>
                   <th style={{ textAlign: 'right' }}>Total Amount</th>
-                  <th style={{ width: '40px' }}></th>
+                  <th style={{ width: '48px', textAlign: 'center' }}></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredExpenses.map(e => {
-                  let membersText = '';
-                  try {
-                    const parsedMems = typeof e.members === 'string' ? JSON.parse(e.members || '[]') : e.members;
-                    if (Array.isArray(parsedMems)) {
-                      membersText = parsedMems.join(', ');
-                    } else if (parsedMems && typeof parsedMems === 'object') {
-                      membersText = Object.keys(parsedMems).join(', ');
-                    }
-                  } catch (err) {
-                    membersText = String(e.members || '');
-                  }
+                  const membersList = parseMembers(e.members);
+                  const isPayerMe = (e.payer || '').toLowerCase() === myHandle;
+                  const catColor = CATEGORIES[e.category]?.color || '#868e96';
 
                   return (
                     <tr key={e.id}>
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        {new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </td>
-                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-                        {e.created_at ? new Date(e.created_at).toLocaleString(undefined, { day: 'numeric', month: 'short', year: '2-digit', hour: 'numeric', minute: 'numeric' }) : '-'}
-                      </td>
+                      {/* Date & Time */}
                       <td>
-                        <div style={{ fontWeight: 700 }}>{e.where_spent}</div>
-                        {e.squad_name && <span style={{ fontSize: '0.65rem', background: 'rgba(14, 165, 233, 0.1)', color: 'var(--primary)', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>SQUAD: {e.squad_name}</span>}
+                        <div className="cell-date-main">
+                          {new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                        <div className="cell-date-sub">
+                          {e.created_at ? new Date(e.created_at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </div>
                       </td>
-                      <td><span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{e.payer}</span></td>
+
+                      {/* Objective & Squad */}
                       <td>
-                        <span className="cat-badge" style={{ borderColor: CATEGORIES[e.category]?.color + '40', background: CATEGORIES[e.category]?.color + '10' }}>
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: CATEGORIES[e.category]?.color || '#868e96' }}></span>
+                        <div className="cell-objective-wrap">
+                          <span className="cell-objective-title">{e.where_spent}</span>
+                          {e.squad_name && (
+                            <span className="cell-squad-badge">
+                              <Users size={11} />
+                              {e.squad_name}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Payer */}
+                      <td>
+                        <div className="cell-payer-pill">
+                          <div className="payer-avatar-circle">
+                            {(e.payer || '?')[0].toUpperCase()}
+                          </div>
+                          <span>{e.payer}</span>
+                          {isPayerMe && <span className="payer-self-tag">You</span>}
+                        </div>
+                      </td>
+
+                      {/* Category */}
+                      <td>
+                        <span 
+                          className="ledger-cat-badge"
+                          style={{
+                            borderColor: `${catColor}35`,
+                            background: `${catColor}12`,
+                            color: catColor
+                          }}
+                        >
+                          <span 
+                            className="ledger-cat-dot" 
+                            style={{ background: catColor, boxShadow: `0 0 6px ${catColor}` }}
+                          />
                           {CATEGORIES[e.category]?.label || e.category}
                         </span>
                       </td>
+
+                      {/* Channel */}
                       <td>
-                        <span className={`app-badge ${PAYMENT_APPS[e.payment_app]?.badge || 'badge-green'}`}>
+                        <span className={`ledger-app-badge ${PAYMENT_APPS[e.payment_app]?.badge || 'app-badge-green'}`}>
                           {PAYMENT_APPS[e.payment_app]?.label || e.payment_app}
                         </span>
                       </td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>
-                        {membersText}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 800, color: 'var(--text-color)' }}>₹ {e.amount.toFixed(2)}</td>
+
+                      {/* Members */}
                       <td>
+                        <div className="cell-members-wrap">
+                          {membersList.slice(0, 3).map((m, idx) => (
+                            <span key={idx} className="member-chip">{m}</span>
+                          ))}
+                          {membersList.length > 3 && (
+                            <span 
+                              className="member-chip-more"
+                              title={membersList.join(', ')}
+                            >
+                              +{membersList.length - 3} more
+                            </span>
+                          )}
+                          {membersList.length === 0 && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>-</span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Amount */}
+                      <td className="cell-amount-text">
+                        ₹ {Number(e.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+
+                      {/* Action Delete */}
+                      <td style={{ textAlign: 'center' }}>
                         <button 
-                          className="btn-delete" 
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                          className="btn-delete-row"
                           onClick={() => triggerDelete(e.id)}
+                          title="Delete record"
                         >
-                          <Trash2 size={15} style={{ color: '#ff3b30' }} />
+                          <Trash2 size={16} />
                         </button>
                       </td>
                     </tr>
@@ -350,32 +750,148 @@ export const Expenses = () => {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* Redesigned Card / Grid View */
+        <div className="ledger-cards-grid">
+          {filteredExpenses.map(e => {
+            const membersList = parseMembers(e.members);
+            const isPayerMe = (e.payer || '').toLowerCase() === myHandle;
+            const catColor = CATEGORIES[e.category]?.color || '#868e96';
 
-      {/* Delete Confirmation Modal */}
+            return (
+              <div key={e.id} className="ledger-expense-card">
+                <div className="card-top-bar">
+                  <div className="card-date-badge">
+                    <Calendar size={12} />
+                    <span>{new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  </div>
+                  <span 
+                    className="ledger-cat-badge"
+                    style={{
+                      borderColor: `${catColor}35`,
+                      background: `${catColor}12`,
+                      color: catColor
+                    }}
+                  >
+                    <span 
+                      className="ledger-cat-dot" 
+                      style={{ background: catColor }}
+                    />
+                    {CATEGORIES[e.category]?.label || e.category}
+                  </span>
+                </div>
+
+                <div className="card-main-info">
+                  <h4 className="card-objective-title">{e.where_spent}</h4>
+                  <div className="card-amount-large">
+                    ₹ {Number(e.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+
+                  <div className="card-metadata-pills">
+                    {e.squad_name && (
+                      <span className="cell-squad-badge">
+                        <Users size={11} />
+                        Squad: {e.squad_name}
+                      </span>
+                    )}
+                    <span className={`ledger-app-badge ${PAYMENT_APPS[e.payment_app]?.badge || 'app-badge-green'}`}>
+                      {PAYMENT_APPS[e.payment_app]?.label || e.payment_app}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="card-split-section">
+                  <div className="card-split-row">
+                    <span className="card-split-label">Payer</span>
+                    <div className="cell-payer-pill">
+                      <div className="payer-avatar-circle" style={{ width: '20px', height: '20px', fontSize: '0.65rem' }}>
+                        {(e.payer || '?')[0].toUpperCase()}
+                      </div>
+                      <span>{e.payer}</span>
+                      {isPayerMe && <span className="payer-self-tag">You</span>}
+                    </div>
+                  </div>
+
+                  <div className="card-split-row" style={{ alignItems: 'flex-start', marginTop: '0.2rem' }}>
+                    <span className="card-split-label">Allocated to</span>
+                    <div className="cell-members-wrap" style={{ justifyContent: 'flex-end', maxWidth: '180px' }}>
+                      {membersList.slice(0, 3).map((m, idx) => (
+                        <span key={idx} className="member-chip">{m}</span>
+                      ))}
+                      {membersList.length > 3 && (
+                        <span className="member-chip-more" title={membersList.join(', ')}>
+                          +{membersList.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card-footer">
+                  <span>
+                    {e.created_at ? 'Logged ' + new Date(e.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Logged'}
+                  </span>
+                  <button 
+                    className="btn-delete-row"
+                    onClick={() => triggerDelete(e.id)}
+                    title="Delete record"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Redesigned Delete Confirmation Modal */}
       {deleteModal.isOpen && (
         <ModalPortal>
-          <div className="modal-overlay" onClick={() => setDeleteModal({ isOpen: false, id: null })}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem', color: '#ff3b30' }}>Delete Entry?</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-                This record will be permanently deleted from the active database. This operation is irreversible.
-              </p>
-              <div className="flex-row-mobile-stack" style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+          <div className="delete-modal-overlay" onClick={() => !isDeleting && setDeleteModal({ isOpen: false, id: null })}>
+            <div className="delete-modal-card" onClick={e => e.stopPropagation()}>
+              <div className="delete-modal-icon-badge">
+                <AlertTriangle size={26} />
+              </div>
+
+              <div>
+                <h3 className="delete-modal-title">Delete Entry Record?</h3>
+                <p className="delete-modal-text">
+                  This expense entry will be permanently removed from the ledger and recalculate squad settlement balances.
+                </p>
+              </div>
+
+              {itemToDelete && (
+                <div className="delete-item-preview">
+                  <div>
+                    <div className="preview-objective">{itemToDelete.where_spent}</div>
+                    <div className="preview-meta">
+                      {new Date(itemToDelete.date).toLocaleDateString()} • Payer: {itemToDelete.payer}
+                      {itemToDelete.squad_name ? ` • Squad: ${itemToDelete.squad_name}` : ''}
+                    </div>
+                  </div>
+                  <div className="preview-amount">
+                    ₹ {Number(itemToDelete.amount).toFixed(2)}
+                  </div>
+                </div>
+              )}
+
+              <div className="delete-modal-actions">
                 <button 
-                  className="btn-glass" 
-                  style={{ flex: 1 }}
+                  className="btn-modal-cancel"
+                  disabled={isDeleting}
                   onClick={() => setDeleteModal({ isOpen: false, id: null })}
                 >
                   Cancel
                 </button>
                 <button 
-                  className="btn-primary" 
-                  style={{ flex: 1, marginTop: 0, background: '#ff3b30', boxShadow: 'none' }}
+                  className="btn-modal-confirm-delete"
+                  disabled={isDeleting}
                   onClick={executeDelete}
                 >
-                  Delete Entry
+                  <Trash2 size={15} />
+                  <span>{isDeleting ? 'Deleting...' : 'Delete Permanently'}</span>
                 </button>
               </div>
             </div>

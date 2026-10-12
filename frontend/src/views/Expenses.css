@@ -1,0 +1,1189 @@
+/* ==========================================================================
+   Expense Ledger Redesign Styles
+   ========================================================================== */
+
+.expenses-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Header Section
+   -------------------------------------------------------------------------- */
+.ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.ledger-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ledger-title-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ledger-title-area h2 {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: var(--text-color);
+  letter-spacing: -0.03em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ledger-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(var(--primary-rgb, 79, 70, 229), 0.12);
+  color: var(--primary);
+  border: 1px solid rgba(var(--primary-rgb, 79, 70, 229), 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ledger-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.ledger-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ledger-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-export-csv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.btn-export-csv:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-log-expense-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(var(--primary-rgb, 79, 70, 229), 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-log-expense-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb, 79, 70, 229), 0.5);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Quick Metric / Stats Cards
+   -------------------------------------------------------------------------- */
+.ledger-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.ledger-metric-card {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 1.2rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.ledger-metric-card:hover {
+  border-color: rgba(var(--primary-rgb, 79, 70, 229), 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.ledger-metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(var(--primary-rgb, 79, 70, 229), 0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ledger-metric-card:hover::before {
+  opacity: 1;
+}
+
+.ledger-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ledger-metric-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ledger-metric-icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-wrap-primary {
+  background: rgba(var(--primary-rgb, 79, 70, 229), 0.12);
+  color: var(--primary);
+}
+
+.icon-wrap-green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.icon-wrap-cyan {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0ea5e9;
+}
+
+.icon-wrap-amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.ledger-metric-value-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ledger-metric-value {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: var(--text-color);
+  letter-spacing: -0.02em;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.1;
+}
+
+.ledger-metric-subtext {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Controls Card (Search, Month, Filter, View Toggles)
+   -------------------------------------------------------------------------- */
+.ledger-controls-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+}
+
+.ledger-controls-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ledger-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 260px;
+  min-width: 220px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0 0.85rem;
+  height: 42px;
+  transition: all 0.2s ease;
+}
+
+.ledger-search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.2);
+}
+
+.ledger-search-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-color);
+  font-size: 0.875rem;
+  padding-left: 0.6rem;
+}
+
+.ledger-search-clear {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+
+.ledger-search-clear:hover {
+  color: var(--text-color);
+}
+
+.ledger-controls-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+/* Month Stepper */
+.ledger-month-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2px 4px;
+  height: 42px;
+}
+
+.month-stepper-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.month-stepper-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-color);
+}
+
+.month-stepper-select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-color);
+  font-size: 0.825rem;
+  font-weight: 700;
+  padding: 0 0.5rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.month-stepper-select option {
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+
+/* View Mode & Sort Segment Controls */
+.ledger-segment-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 3px;
+  height: 42px;
+}
+
+.ledger-segment-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.45rem 0.65rem;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.ledger-segment-btn:hover {
+  color: var(--text-color);
+}
+
+.ledger-segment-btn.active {
+  background: var(--card-bg);
+  color: var(--text-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ledger-sort-select {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 12px;
+  padding: 0 0.75rem;
+  height: 42px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.ledger-sort-select option {
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+
+/* Filter Chips Bar (Category + Scope) */
+.ledger-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ledger-category-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ledger-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-dim);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.ledger-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-color);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ledger-chip.active {
+  background: rgba(var(--primary-rgb, 79, 70, 229), 0.15);
+  color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(var(--primary-rgb, 79, 70, 229), 0.25);
+}
+
+.ledger-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ledger-chip-count {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-weight: 800;
+}
+
+.ledger-payer-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50px;
+  padding: 3px;
+}
+
+.ledger-payer-tab {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ledger-payer-tab.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Table View Redesign
+   -------------------------------------------------------------------------- */
+.ledger-card-table-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ledger-table-header-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.ledger-table-header-info h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ledger-count-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.ledger-table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+
+.ledger-table th {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.ledger-table td {
+  padding: 1.1rem 1.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-color);
+  font-size: 0.875rem;
+  vertical-align: middle;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.ledger-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.ledger-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ledger-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Cells Styling */
+.cell-date-main {
+  font-weight: 700;
+  color: var(--text-color);
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.cell-date-sub {
+  font-size: 0.725rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  margin-top: 0.15rem;
+}
+
+.cell-objective-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 160px;
+}
+
+.cell-objective-title {
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.3;
+}
+
+.cell-squad-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(14, 165, 233, 0.12);
+  color: #0ea5e9;
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.cell-payer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.payer-avatar-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.payer-self-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  margin-left: 0.3rem;
+  text-transform: uppercase;
+}
+
+/* Category Badge */
+.ledger-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.ledger-cat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Payment App Badge */
+.ledger-app-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.app-badge-purple {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.app-badge-green {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+/* Members / Group Share Details */
+.cell-members-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  max-width: 240px;
+}
+
+.member-chip {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.member-chip-more {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb, 79, 70, 229), 0.1);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+/* Amount & Action Buttons */
+.cell-amount-text {
+  text-align: right;
+  font-weight: 900;
+  font-size: 1.05rem;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.btn-delete-row {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.45rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-delete-row:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  transform: scale(1.08);
+}
+
+/* --------------------------------------------------------------------------
+   Card / Grid View Redesign
+   -------------------------------------------------------------------------- */
+.ledger-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 1.15rem;
+  width: 100%;
+}
+
+.ledger-expense-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.15rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.ledger-expense-card:hover {
+  border-color: rgba(var(--primary-rgb, 79, 70, 229), 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+}
+
+.card-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.card-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-objective-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.card-amount-large {
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--text-color);
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.card-metadata-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.card-split-section {
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-split-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.775rem;
+}
+
+.card-split-label {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------------------------------
+   Empty & Loading States
+   -------------------------------------------------------------------------- */
+.ledger-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5rem 2rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+}
+
+.empty-state-icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb, 79, 70, 229), 0.1);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.ledger-empty-state h4 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin-bottom: 0.4rem;
+}
+
+.ledger-empty-state p {
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  max-width: 380px;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Loading Shimmer Skeleton */
+.ledger-loading-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 2.5rem;
+}
+
+.skeleton-row {
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite linear;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* --------------------------------------------------------------------------
+   Delete Confirmation Modal Redesign
+   -------------------------------------------------------------------------- */
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: modalOverlayFade 0.25s ease-out;
+}
+
+@keyframes modalOverlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.delete-modal-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(239, 68, 68, 0.15);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 460px;
+  padding: 2rem;
+  position: relative;
+  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.delete-modal-icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-modal-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.delete-modal-text {
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.delete-item-preview {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 0.9rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.preview-objective {
+  font-weight: 700;
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.preview-meta {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 0.15rem;
+}
+
+.preview-amount {
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: #ef4444;
+  font-family: 'Outfit', sans-serif;
+}
+
+.delete-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-modal-cancel {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-modal-confirm-delete {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-modal-confirm-delete:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+}
+
+.btn-modal-confirm-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .ledger-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ledger-controls-top-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ledger-controls-actions-group {
+    justify-content: space-between;
+  }
+
+  .ledger-month-stepper {
+    flex: 1;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .ledger-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ledger-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ledger-header-actions {
+    width: 100%;
+  }
+
+  .btn-export-csv, .btn-log-expense-primary {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .ledger-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ledger-category-chips {
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ledger-chip {
+    flex-shrink: 0;
+  }
+
+  .ledger-payer-tabs {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ledger-payer-tab {
+    flex: 1;
+    text-align: center;
+  }
+}
