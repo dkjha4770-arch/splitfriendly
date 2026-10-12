@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useVersionCheck } from '../hooks/useVersionCheck';
-import { RefreshCw, X, Sparkles } from 'lucide-react';
+import { RefreshCw, X, Sparkles, ArrowRight } from 'lucide-react';
 
 /**
- * Floating update notification that appears at the bottom-right of the screen
- * whenever a new version of the app is deployed to Vercel.
- * Clicking "Update Now" reloads the page to get the fresh bundle.
+ * Prominent floating update popup that appears across all views
+ * whenever a new version/commit is deployed.
+ * Clicking "Update Now" reloads the app to get the fresh bundle.
  */
 export default function UpdateBanner() {
   const updateAvailable = useVersionCheck();
@@ -16,146 +16,188 @@ export default function UpdateBanner() {
 
   const handleUpdate = () => {
     setRefreshing(true);
-    // Small delay so the spin animation is visible
-    setTimeout(() => window.location.reload(), 400);
+    // Hard reload with cache bust
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   };
 
   return (
     <>
       <style>{`
-        @keyframes sf-banner-in {
-          from { opacity: 0; transform: translateY(24px) scale(0.95); }
-          to   { opacity: 1; transform: translateY(0)   scale(1);    }
+        @keyframes sf-popup-in {
+          0% {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.96);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes sf-pulse-glow {
+          0%, 100% {
+            box-shadow: 0 10px 35px rgba(79, 70, 229, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.3);
+          }
+          50% {
+            box-shadow: 0 14px 45px rgba(79, 70, 229, 0.65), 0 0 0 2px rgba(129, 140, 248, 0.6);
+          }
         }
         @keyframes sf-spin {
-          from { transform: rotate(0deg);   }
+          from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
         }
-        .sf-update-banner {
+        .sf-update-banner-container {
           position: fixed;
-          bottom: 1.5rem;
-          right: 1.5rem;
-          z-index: 9999;
+          top: 1.5rem;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 999999;
+          width: calc(100% - 2rem);
+          max-width: 480px;
+          animation: sf-popup-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .sf-update-banner-card {
           display: flex;
           align-items: center;
           gap: 1rem;
-          padding: 1rem 1.25rem;
+          padding: 0.9rem 1.25rem;
           border-radius: 18px;
-          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.45),
-            0 0 0 1px rgba(155, 81, 224, 0.18),
-            inset 0 1px 0 rgba(255,255,255,0.06);
-          animation: sf-banner-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-          max-width: 360px;
-          backdrop-filter: blur(12px);
+          background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 60%, #1e293b 100%);
+          border: 1px solid rgba(129, 140, 248, 0.4);
+          animation: sf-pulse-glow 3s infinite ease-in-out;
+          backdrop-filter: blur(16px);
         }
-        .sf-update-icon-wrap {
+        .sf-update-icon-box {
           flex-shrink: 0;
-          width: 38px;
-          height: 38px;
+          width: 42px;
+          height: 42px;
           border-radius: 12px;
-          background: linear-gradient(135deg, #9b51e0, #4facfe);
+          background: linear-gradient(135deg, #4f46e5, #06b6d4);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 12px rgba(155, 81, 224, 0.4);
+          box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45);
         }
-        .sf-update-body {
+        .sf-update-text-area {
           flex: 1;
           min-width: 0;
         }
-        .sf-update-title {
-          font-size: 0.85rem;
-          font-weight: 700;
+        .sf-update-heading {
+          font-size: 0.92rem;
+          font-weight: 800;
           color: #ffffff;
-          letter-spacing: -0.01em;
-          margin: 0 0 2px;
+          margin: 0 0 2px 0;
           display: flex;
           align-items: center;
           gap: 0.4rem;
         }
-        .sf-update-sub {
-          font-size: 0.72rem;
-          color: rgba(255,255,255,0.5);
+        .sf-update-subtitle {
+          font-size: 0.76rem;
+          color: rgba(226, 232, 240, 0.75);
           margin: 0;
+          line-height: 1.3;
         }
-        .sf-update-btn {
+        .sf-update-action-btn {
           flex-shrink: 0;
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          gap: 0.4rem;
-          padding: 0.5rem 1rem;
-          border-radius: 10px;
+          gap: 0.45rem;
+          padding: 0.55rem 1.1rem;
+          border-radius: 12px;
           border: none;
           cursor: pointer;
-          font-size: 0.78rem;
-          font-weight: 700;
-          background: linear-gradient(135deg, #9b51e0, #4facfe);
-          color: #fff;
-          transition: opacity 0.2s, transform 0.2s;
+          font-size: 0.82rem;
+          font-weight: 800;
+          background: linear-gradient(135deg, #4f46e5, #06b6d4);
+          color: #ffffff;
+          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+          transition: transform 0.15s ease, opacity 0.15s ease;
           white-space: nowrap;
-          box-shadow: 0 2px 8px rgba(155, 81, 224, 0.35);
         }
-        .sf-update-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-        .sf-update-btn:active { transform: translateY(0); }
-        .sf-update-btn svg.spinning {
+        .sf-update-action-btn:hover {
+          transform: translateY(-1px);
+          opacity: 0.92;
+        }
+        .sf-update-action-btn:active {
+          transform: translateY(0);
+        }
+        .sf-update-action-btn svg.sf-spinning {
           animation: sf-spin 0.6s linear infinite;
         }
-        .sf-update-dismiss {
+        .sf-update-close-btn {
           flex-shrink: 0;
           background: none;
           border: none;
           cursor: pointer;
-          padding: 4px;
-          color: rgba(255,255,255,0.35);
+          padding: 6px;
+          color: rgba(255, 255, 255, 0.4);
           display: flex;
           align-items: center;
-          transition: color 0.2s;
-          border-radius: 6px;
+          justify-content: center;
+          transition: color 0.15s ease;
+          border-radius: 8px;
         }
-        .sf-update-dismiss:hover { color: rgba(255,255,255,0.75); }
+        .sf-update-close-btn:hover {
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.08);
+        }
         @media (max-width: 480px) {
-          .sf-update-banner {
-            bottom: 1rem;
-            right: 1rem;
-            left: 1rem;
-            max-width: none;
+          .sf-update-banner-container {
+            top: 1rem;
+            width: calc(100% - 1.5rem);
+          }
+          .sf-update-banner-card {
+            padding: 0.8rem 1rem;
+            gap: 0.75rem;
+          }
+          .sf-update-icon-box {
+            width: 36px;
+            height: 36px;
+          }
+          .sf-update-action-btn {
+            padding: 0.5rem 0.85rem;
+            font-size: 0.78rem;
           }
         }
       `}</style>
 
-      <div className="sf-update-banner" role="status" aria-live="polite">
-        {/* Icon */}
-        <div className="sf-update-icon-wrap">
-          <Sparkles size={18} color="#fff" />
+      <div className="sf-update-banner-container" role="status" aria-live="polite">
+        <div className="sf-update-banner-card">
+          {/* Glowing Icon */}
+          <div className="sf-update-icon-box">
+            <Sparkles size={20} color="#ffffff" />
+          </div>
+
+          {/* Text Content */}
+          <div className="sf-update-text-area">
+            <div className="sf-update-heading">
+              <span>App Update Available</span>
+            </div>
+            <p className="sf-update-subtitle">
+              A new build has been deployed. Tap to refresh and load the latest features.
+            </p>
+          </div>
+
+          {/* Update Action Button */}
+          <button
+            className="sf-update-action-btn"
+            onClick={handleUpdate}
+            aria-label="Refresh to update app"
+          >
+            <RefreshCw size={14} className={refreshing ? 'sf-spinning' : ''} />
+            <span>{refreshing ? 'Updating…' : 'Update App'}</span>
+          </button>
+
+          {/* Dismiss button */}
+          <button
+            className="sf-update-close-btn"
+            onClick={() => setDismissed(true)}
+            aria-label="Dismiss notification"
+          >
+            <X size={16} />
+          </button>
         </div>
-
-        {/* Text */}
-        <div className="sf-update-body">
-          <p className="sf-update-title">New version available</p>
-          <p className="sf-update-sub">Refresh to get the latest features &amp; fixes.</p>
-        </div>
-
-        {/* Update button */}
-        <button
-          className="sf-update-btn"
-          onClick={handleUpdate}
-          aria-label="Refresh to update"
-        >
-          <RefreshCw size={13} className={refreshing ? 'spinning' : ''} />
-          {refreshing ? 'Loading…' : 'Update'}
-        </button>
-
-        {/* Dismiss */}
-        <button
-          className="sf-update-dismiss"
-          onClick={() => setDismissed(true)}
-          aria-label="Dismiss update notification"
-        >
-          <X size={14} />
-        </button>
       </div>
     </>
   );
