@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
+import { getExpensesData, getCachedExpensesData, invalidateExpensesCache } from '../utils/dataCache';
 import {
   Plus,
   ArrowRight,
@@ -42,10 +43,11 @@ export const Dashboard = () => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
-  // States
-  const [expenses, setExpenses] = useState([]);
-  const [squads, setSquads] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // States — restored instantly from cache if available
+  const initialCache = getCachedExpensesData();
+  const [expenses, setExpenses] = useState(() => initialCache?.expenses || []);
+  const [squads, setSquads] = useState(() => initialCache?.squads || []);
+  const [loading, setLoading] = useState(() => !initialCache);
   const [error, setError] = useState(null);
 
   // Filters
@@ -57,7 +59,9 @@ export const Dashboard = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [selectedSquadForSettlements, setSelectedSquadForSettlements] = useState(null);
+  const [selectedSquadForSettlements, setSelectedSquadForSettlements] = useState(() => {
+    return initialCache?.squads?.[0]?.name || null;
+  });
 
   // Modal State for Confirm Settle
   const [settlementModal, setSettlementModal] = useState({
@@ -85,13 +89,13 @@ export const Dashboard = () => {
     monthOptions.push({ value: `${yyyy}-${mm}`, label });
   }
 
-  // Fetch Data (combined endpoint)
-  const fetchData = useCallback(async () => {
+  // Fetch Data (combined endpoint with SWR caching)
+  const fetchData = useCallback(async (forceRefresh = false) => {
     try {
-      setLoading(true);
-      const res = await fetch('/api/expenses/data', { headers: authHeaders });
-      if (!res.ok) throw new Error('Secure connection failed.');
-      const data = await res.json();
+      if (!getCachedExpensesData()) {
+        setLoading(true);
+      }
+      const data = await getExpensesData(authHeaders, forceRefresh);
       setExpenses(data.expenses || []);
       setSquads(data.squads || []);
 
@@ -106,7 +110,7 @@ export const Dashboard = () => {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, selectedSquadForSettlements]);
 
   useEffect(() => {
     if (token) {
@@ -330,7 +334,8 @@ export const Dashboard = () => {
       if (!data.success) throw new Error(data.error || 'Server error.');
 
       setSettlementModal(prev => ({ ...prev, isOpen: false }));
-      fetchData();
+      invalidateExpensesCache();
+      fetchData(true);
     } catch (err) {
       alert('Settlement failed: ' + err.message);
     }
@@ -358,7 +363,8 @@ export const Dashboard = () => {
       if (!data.success) throw new Error(data.error || 'Delete failed.');
 
       setDeleteModal({ isOpen: false, id: null });
-      fetchData();
+      invalidateExpensesCache();
+      fetchData(true);
     } catch (err) {
       alert('Delete failed: ' + err.message);
     }

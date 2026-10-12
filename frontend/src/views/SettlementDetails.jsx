@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
+import { getExpensesData, getCachedExpensesData, invalidateExpensesCache } from '../utils/dataCache';
 import { 
   ArrowLeftRight, 
   Search, 
@@ -32,11 +33,12 @@ export const SettlementDetails = () => {
   const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
 
-  // Data State
-  const [expenses, setExpenses] = useState([]);
-  const [squads, setSquads] = useState([]);
-  const [systemUsers, setSystemUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Data State — restored instantly from cache if available
+  const initialCache = getCachedExpensesData();
+  const [expenses, setExpenses] = useState(() => initialCache?.expenses || []);
+  const [squads, setSquads] = useState(() => initialCache?.squads || []);
+  const [systemUsers, setSystemUsers] = useState(() => initialCache?.users || []);
+  const [loading, setLoading] = useState(() => !initialCache);
   const [error, setError] = useState(null);
 
   // Filter State
@@ -70,12 +72,12 @@ export const SettlementDetails = () => {
     return options;
   }, []);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (forceRefresh = false) => {
     try {
-      setLoading(true);
-      const res = await fetch('/api/expenses/data', { headers: authHeaders });
-      if (!res.ok) throw new Error('Failed to load transaction data.');
-      const data = await res.json();
+      if (!getCachedExpensesData()) {
+        setLoading(true);
+      }
+      const data = await getExpensesData(authHeaders, forceRefresh);
       setExpenses(data.expenses || []);
       setSquads(data.squads || []);
       setSystemUsers(data.users || []);
@@ -233,7 +235,8 @@ export const SettlementDetails = () => {
       if (!data.success) throw new Error(data.error || 'Delete failed.');
 
       setDeleteModal({ isOpen: false, id: null });
-      fetchData();
+      invalidateExpensesCache();
+      fetchData(true);
     } catch (err) {
       alert('Delete failed: ' + err.message);
     }

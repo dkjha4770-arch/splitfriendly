@@ -2,40 +2,100 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const AuthContext = createContext(null);
 
+// Fast helper to decode JWT payload safely
+function decodeJwtPayload(tokenStr) {
+  try {
+    const parts = tokenStr.split('.');
+    if (parts.length === 3) {
+      const payload = JSON.parse(atob(parts[1]));
+      return payload;
+    }
+  } catch {
+    // ignore malformed token
+  }
+  return null;
+}
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(() => localStorage.getItem('sf_auth_token') || null);
+  const [token, setToken] = useState(() => {
+    try {
+      const stored = localStorage.getItem('sf_auth_token');
+      if (!stored) return null;
+      const payload = decodeJwtPayload(stored);
+      if (payload && payload.exp && payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem('sf_auth_token');
+        localStorage.removeItem('sf_user');
+        return null;
+      }
+      return stored;
+    } catch {
+      return localStorage.getItem('sf_auth_token') || null;
+    }
+  });
+
+  const [user, setUser] = useState(() => {
+    try {
+      const storedToken = localStorage.getItem('sf_auth_token');
+      if (!storedToken) return null;
+      const storedUser = localStorage.getItem('sf_user');
+      if (storedUser) {
+        return JSON.parse(storedUser);
+      }
+      // Reconstruct user identity immediately from valid JWT payload
+      const payload = decodeJwtPayload(storedToken);
+      if (payload) {
+        return {
+          id: payload.id,
+          username: payload.username,
+          unique_id: payload.unique_id,
+          display_name: (payload.username || '').split('@')[0],
+          avatar_color: '135deg,#9d00ff,#00d2ff'
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Zero blocking: if there is no token, or user already restored from cache, loading is instantly false
+  const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('theme') || 'dark';
   });
 
-  // Verify session on mount
+  // Background non-blocking session check on mount
   useEffect(() => {
     const checkAuth = async () => {
+      const storedToken = localStorage.getItem('sf_auth_token');
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const storedToken = localStorage.getItem('sf_auth_token');
-        const headers = storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {};
-        const response = await fetch('/api/auth/profile', { headers });
+        const response = await fetch('/api/auth/profile', {
+          headers: { 'Authorization': `Bearer ${storedToken}` }
+        });
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.user) {
             setUser(data.user);
+            localStorage.setItem('sf_user', JSON.stringify(data.user));
           }
-          // Store/refresh the token returned by profile endpoint.
-          // This covers mobile users with an existing cookie session who
-          // don't yet have the token in localStorage.
           if (data.token) {
             setToken(data.token);
             localStorage.setItem('sf_auth_token', data.token);
           }
-        } else {
+        } else if (response.status === 401 || response.status === 403) {
           // Token invalid or expired — clear it
           localStorage.removeItem('sf_auth_token');
+          localStorage.removeItem('sf_user');
           setToken(null);
+          setUser(null);
         }
       } catch (err) {
-        console.error('Session check failed:', err);
+        console.warn('Silent background session verification skipped/offline:', err);
       } finally {
         setLoading(false);
       }
@@ -67,6 +127,7 @@ export const AuthProvider = ({ children }) => {
 
     if (data.success && data.user) {
       setUser(data.user);
+      localStorage.setItem('sf_user', JSON.stringify(data.user));
     }
     if (data.token) {
       setToken(data.token);
@@ -84,6 +145,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setToken(null);
       localStorage.removeItem('sf_auth_token');
+      localStorage.removeItem('sf_user');
       // Redirect to login page
       window.location.href = '/login';
     }
@@ -98,6 +160,7 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         if (data.success && data.user) {
           setUser(data.user);
+          localStorage.setItem('sf_user', JSON.stringify(data.user));
         }
         if (data.token) {
           setToken(data.token);

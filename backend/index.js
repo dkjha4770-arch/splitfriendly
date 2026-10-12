@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const compression = require('compression');
 const db = require('./config/db');
 
 // Load environment variables
@@ -47,6 +48,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+app.use(compression());
 
 app.use(cookieParser());
 app.use(express.json());

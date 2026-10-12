@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
+import { getExpensesData, getCachedExpensesData, invalidateExpensesCache } from '../utils/dataCache';
 import { 
   Plus, 
   Download, 
@@ -33,10 +34,11 @@ export const Expenses = () => {
   const { user, token } = useAuth();
   const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
   
-  // Data State
-  const [expenses, setExpenses] = useState([]);
-  const [squads, setSquads] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Data State — restored instantly from cache if available
+  const initialCache = getCachedExpensesData();
+  const [expenses, setExpenses] = useState(() => initialCache?.expenses || []);
+  const [squads, setSquads] = useState(() => initialCache?.squads || []);
+  const [loading, setLoading] = useState(() => !initialCache);
   const [error, setError] = useState(null);
 
   // Filters State
@@ -66,13 +68,13 @@ export const Expenses = () => {
     monthOptions.push({ value: `${yyyy}-${mm}`, label });
   }
 
-  // Fetch Expenses + Squads (using /data endpoint for squad membership)
-  const fetchExpenses = useCallback(async () => {
+  // Fetch Expenses + Squads (using SWR dataCache)
+  const fetchExpenses = useCallback(async (forceRefresh = false) => {
     try {
-      setLoading(true);
-      const res = await fetch('/api/expenses/data', { headers: authHeaders });
-      if (!res.ok) throw new Error('Secure connection failed.');
-      const data = await res.json();
+      if (!getCachedExpensesData()) {
+        setLoading(true);
+      }
+      const data = await getExpensesData(authHeaders, forceRefresh);
       setExpenses(data.expenses || []);
       setSquads(data.squads || []);
     } catch (err) {
@@ -182,7 +184,8 @@ export const Expenses = () => {
       if (!data.success) throw new Error(data.error || 'Delete failed.');
 
       setDeleteModal({ isOpen: false, id: null });
-      fetchExpenses();
+      invalidateExpensesCache();
+      fetchExpenses(true);
     } catch (err) {
       alert('Delete failed: ' + err.message);
     }

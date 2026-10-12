@@ -31,6 +31,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
     if (isOpen && onClose) {
       onClose();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, location.search]);
   
   if (!user) return null;

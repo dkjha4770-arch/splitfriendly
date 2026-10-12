@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { invalidateExpensesCache } from '../utils/dataCache';
 import { 
   Users, 
   Plus, 
@@ -200,6 +201,7 @@ export const Squads = () => {
       setSquadId(null);
       setSquadName('');
       setSelectedMembers([]);
+      invalidateExpensesCache();
       fetchData();
     } catch (err) {
       alert('Operation failed: ' + err.message);
@@ -221,6 +223,7 @@ export const Squads = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Server rejected request.');
 
+      invalidateExpensesCache();
       fetchData();
     } catch (err) {
       alert('Dissolution failed: ' + err.message);

@@ -11,6 +11,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { Chart, registerables } from 'chart.js';
+import { getExpensesData, getCachedExpensesData } from '../utils/dataCache';
 Chart.register(...registerables);
 
 const CATEGORIES = {
@@ -29,10 +30,11 @@ export const Analytics = () => {
   const catChartInstance = useRef(null);
   const trendChartInstance = useRef(null);
 
-  // Data state
-  const [expenses, setExpenses] = useState([]);
-  const [squads, setSquads] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Data state — restored instantly from cache if available
+  const initialCache = getCachedExpensesData();
+  const [expenses, setExpenses] = useState(() => initialCache?.expenses || []);
+  const [squads, setSquads] = useState(() => initialCache?.squads || []);
+  const [loading, setLoading] = useState(() => !initialCache);
 
   // Filters State
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -54,16 +56,15 @@ export const Analytics = () => {
     monthOptions.push({ value: `${yyyy}-${mm}`, label });
   }
 
-  // Fetch data
-  const fetchData = useCallback(async () => {
+  // Fetch data with SWR caching
+  const fetchData = useCallback(async (forceRefresh = false) => {
     try {
-      setLoading(true);
-      const res = await fetch('/api/expenses/data', { headers: authHeaders });
-      if (res.ok) {
-        const data = await res.json();
-        setExpenses(data.expenses || []);
-        setSquads(data.squads || []);
+      if (!getCachedExpensesData()) {
+        setLoading(true);
       }
+      const data = await getExpensesData(authHeaders, forceRefresh);
+      setExpenses(data.expenses || []);
+      setSquads(data.squads || []);
     } catch (err) {
       console.error('Failed to fetch analytics data:', err);
     } finally {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
+import { getExpensesData, getCachedExpensesData, invalidateExpensesCache } from '../utils/dataCache';
 import { 
   Calendar, 
   DollarSign, 
@@ -22,10 +23,12 @@ import {
 export const Settlements = () => {
   const { user, token } = useAuth();
   const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
-  const [expenses, setExpenses] = useState([]);
-  const [squads, setSquads] = useState([]);
-  const [systemUsers, setSystemUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Instant state restoration from cache
+  const initialCache = getCachedExpensesData();
+  const [expenses, setExpenses] = useState(() => initialCache?.expenses || []);
+  const [squads, setSquads] = useState(() => initialCache?.squads || []);
+  const [systemUsers, setSystemUsers] = useState(() => initialCache?.users || []);
+  const [loading, setLoading] = useState(() => !initialCache);
   const [error, setError] = useState(null);
 
   // Month filter – default to current month
@@ -114,12 +117,12 @@ export const Settlements = () => {
 
   const cycleStart = calculateCycleStart();
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (forceRefresh = false) => {
     try {
-      setLoading(true);
-      const res = await fetch('/api/expenses/data', { headers: authHeaders });
-      if (!res.ok) throw new Error('Failed to load transaction data.');
-      const data = await res.json();
+      if (!getCachedExpensesData()) {
+        setLoading(true);
+      }
+      const data = await getExpensesData(authHeaders, forceRefresh);
       setExpenses(data.expenses || []);
       setSquads(data.squads || []);
       setSystemUsers(data.users || []);
@@ -330,7 +333,8 @@ export const Settlements = () => {
       if (!data.success) throw new Error(data.error || 'Server rejected settlement.');
       
       setModal(prev => ({ ...prev, isOpen: false }));
-      fetchData();
+      invalidateExpensesCache();
+      fetchData(true);
     } catch (err) {
       alert('Settlement failed: ' + err.message);
     }
@@ -411,7 +415,8 @@ export const Settlements = () => {
         if (!data.success) throw new Error(data.error || 'Settlement failed.');
       }
       setBatchModal({ isOpen: false, items: [], selected: {} });
-      fetchData();
+      invalidateExpensesCache();
+      fetchData(true);
     } catch (err) {
       alert('Batch settlement failed: ' + err.message);
     } finally {

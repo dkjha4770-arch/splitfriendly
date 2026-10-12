@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { KeyRound, User, Lock, AlertCircle, Wallet } from 'lucide-react';
 
 export const Login = () => {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  if (useAuth().user) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   useEffect(() => {
     // Send a request to wake/pre-warm database connection pool in the background
@@ -21,6 +17,10 @@ export const Login = () => {
       console.warn('Background database pre-warm failed/timed out:', err);
     });
   }, []);
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

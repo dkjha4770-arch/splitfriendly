@@ -69,13 +69,16 @@ router.get('/data', authMiddleware, async (req, res) => {
   const client = await db.pool.connect();
 
   try {
-    const allUsersRows = await client.query('SELECT username, display_name, avatar_color, unique_id FROM users');
-    const rawExpensesRows = await client.query('SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name, created_at FROM expenses ORDER BY date DESC, id DESC');
-    const rawSquadsRows = await client.query('SELECT s.id, s.name, s.creator_id, s.members, u.username as creator FROM squads s JOIN users u ON s.creator_id = u.id');
+    // Send all three queries in a single multi-statement execution to eliminate network round-trip overhead on Neon
+    const multiRes = await client.query(`
+      SELECT username, display_name, avatar_color, unique_id FROM users;
+      SELECT id, date, amount, payer, share, where_spent, category, payment_app, members, squad_name, created_at FROM expenses ORDER BY date DESC, id DESC;
+      SELECT s.id, s.name, s.creator_id, s.members, u.username as creator FROM squads s JOIN users u ON s.creator_id = u.id;
+    `);
 
-    const allUsers = allUsersRows.rows;
-    const rawExpenses = rawExpensesRows.rows;
-    const rawSquads = rawSquadsRows.rows;
+    const allUsers = multiRes[0].rows;
+    const rawExpenses = multiRes[1].rows;
+    const rawSquads = multiRes[2].rows;
 
     const me = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
     const myUniqueId = (me?.unique_id || req.user.unique_id || '').toLowerCase();

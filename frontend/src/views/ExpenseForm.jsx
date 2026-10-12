@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { invalidateExpensesCache } from '../utils/dataCache';
 import { 
   ArrowLeft, 
   Users, 
@@ -323,7 +324,8 @@ export const ExpenseForm = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Server rejected transaction.');
       
-      // Navigate to ledger
+      // Invalidate cache and navigate to ledger
+      invalidateExpensesCache();
       navigate('/expenses');
     } catch (err) {
       alert('Transaction failed: ' + err.message);
