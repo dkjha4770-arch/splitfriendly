@@ -260,7 +260,9 @@ export const Expenses = () => {
           return Number(e.share) || (Number(e.amount) / (parsed.length || 1));
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // ignore parse errors
+    }
     return 0;
   }, [myHandle]);
 

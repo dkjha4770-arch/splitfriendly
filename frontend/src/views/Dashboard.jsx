@@ -6,7 +6,9 @@ import { getExpensesData, getCachedExpensesData, invalidateExpensesCache } from 
 import {
   Plus,
   DollarSign,
+  Activity,
   TrendingUp,
+  ArrowUpRight,
   ArrowDownRight,
   Calendar,
   Users,
@@ -110,16 +112,16 @@ export const Dashboard = () => {
 
   // Filtered expenses for selected month
   const monthlyExpenses = useMemo(() => {
-    return expenses.filter(e => e.date.substring(0, 7) === selectedMonth);
+    return expenses.filter(e => e && e.date && String(e.date).substring(0, 7) === selectedMonth);
   }, [expenses, selectedMonth]);
 
   // Volume & entry count (excluding settlements)
   const activeExpenses = useMemo(() => {
-    return monthlyExpenses.filter(e => e.category !== 'settlement');
+    return monthlyExpenses.filter(e => e && e.category !== 'settlement');
   }, [monthlyExpenses]);
 
   const totalVolume = useMemo(() => {
-    return activeExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    return activeExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
   }, [activeExpenses]);
 
   const totalEntries = activeExpenses.length;
@@ -143,19 +145,23 @@ export const Dashboard = () => {
     const catTotals = {};
 
     monthlyExpenses.forEach(e => {
-      const payer = e.payer.toLowerCase();
-      if (payer === myHandle) spent += Number(e.amount);
+      if (!e) return;
+      const payer = String(e.payer || '').toLowerCase();
+      if (payer === myHandle) spent += Number(e.amount || 0);
 
       let myShare = 0;
       if (e.members && typeof e.members === 'object' && !Array.isArray(e.members)) {
-        if (e.members[myHandle] !== undefined) myShare = Number(e.members[myHandle]);
+        if (e.members[myHandle] !== undefined) myShare = Number(e.members[myHandle] || 0);
       } else if (Array.isArray(e.members)) {
-        if (e.members.map(m => m.toLowerCase()).includes(myHandle)) myShare = Number(e.share);
+        if (e.members.map(m => String(m || '').toLowerCase()).includes(myHandle)) {
+          myShare = Number(e.share || 0);
+        }
       }
       share += myShare;
 
       if (e.category !== 'settlement') {
-        catTotals[e.category] = (catTotals[e.category] || 0) + Number(e.amount);
+        const catKey = e.category || 'other';
+        catTotals[catKey] = (catTotals[catKey] || 0) + Number(e.amount || 0);
       }
     });
 
@@ -240,42 +246,57 @@ export const Dashboard = () => {
   const squadSettlements = useMemo(() => {
     if (!selectedSquadForSettlements) return [];
 
-    const squad = squads.find(s => s.name === selectedSquadForSettlements);
+    const squad = squads.find(s => s && s.name === selectedSquadForSettlements);
     if (!squad) return [];
 
-    const myUid = user?.unique_id?.toLowerCase() || '';
-    const otherMembers = squad.members.filter(m => {
-      const mName = m.name.split('@')[0].toLowerCase();
-      const mUid = (m.uid || '').toLowerCase();
-      const isSelf = mName === myHandle || (myUid !== '' && mUid.includes(myUid)) || (myUid !== '' && myUid.includes(mUid));
+    let squadMembers = [];
+    try {
+      if (typeof squad.members === 'string') {
+        squadMembers = JSON.parse(squad.members || '[]');
+      } else if (Array.isArray(squad.members)) {
+        squadMembers = squad.members;
+      }
+    } catch (_) {
+      squadMembers = [];
+    }
+
+    const myUid = (user?.unique_id || '').toLowerCase();
+    const otherMembers = squadMembers.filter(m => {
+      const rawName = typeof m === 'object' && m ? (m.name || '') : String(m || '');
+      const mName = rawName.split('@')[0].toLowerCase();
+      const mUid = (typeof m === 'object' && m ? (m.uid || '') : '').toLowerCase();
+      const isSelf = mName === myHandle || (myUid !== '' && mUid.includes(myUid));
       return !isSelf;
     });
 
     const balances = {};
     otherMembers.forEach(m => {
-      balances[m.name.toLowerCase()] = 0;
+      const rawName = typeof m === 'object' && m ? (m.name || '') : String(m || '');
+      const handle = rawName.split('@')[0].toLowerCase();
+      balances[handle] = 0;
     });
 
     // Filter expenses belonging to this squad
-    const squadExpenses = expenses.filter(e => e.squad_name === selectedSquadForSettlements);
+    const squadExpenses = expenses.filter(e => e && e.squad_name === selectedSquadForSettlements);
 
     squadExpenses.forEach(e => {
-      const payer = e.payer.toLowerCase();
+      if (!e) return;
+      const payer = String(e.payer || '').toLowerCase();
 
       if (payer === myHandle) {
         // I paid. Others owe me
         if (e.members && typeof e.members === 'object' && !Array.isArray(e.members)) {
           for (const [mem, amt] of Object.entries(e.members)) {
-            const ml = mem.toLowerCase();
+            const ml = String(mem).split('@')[0].toLowerCase();
             if (balances[ml] !== undefined) {
-              balances[ml] += Number(amt);
+              balances[ml] += Number(amt || 0);
             }
           }
         } else if (Array.isArray(e.members)) {
           e.members.forEach(mem => {
-            const ml = mem.toLowerCase();
+            const ml = String(mem).split('@')[0].toLowerCase();
             if (balances[ml] !== undefined) {
-              balances[ml] += Number(e.share);
+              balances[ml] += Number(e.share || 0);
             }
           });
         }
@@ -283,11 +304,11 @@ export const Dashboard = () => {
         // Someone in the balances paid. Do I owe them?
         if (e.members && typeof e.members === 'object' && !Array.isArray(e.members)) {
           if (e.members[myHandle] !== undefined) {
-            balances[payer] -= Number(e.members[myHandle]);
+            balances[payer] -= Number(e.members[myHandle] || 0);
           }
         } else if (Array.isArray(e.members)) {
-          if (e.members.map(m => m.toLowerCase()).includes(myHandle)) {
-            balances[payer] -= Number(e.share);
+          if (e.members.map(m => String(m).split('@')[0].toLowerCase()).includes(myHandle)) {
+            balances[payer] -= Number(e.share || 0);
           }
         }
       }
@@ -296,9 +317,16 @@ export const Dashboard = () => {
     const list = [];
     for (const [mName, bal] of Object.entries(balances)) {
       if (Math.abs(bal) > 0.05) {
-        const matchedMem = squad.members.find(sm => sm.name.toLowerCase() === mName);
+        const matchedMem = squadMembers.find(sm => {
+          const rawName = typeof sm === 'object' && sm ? (sm.name || '') : String(sm || '');
+          return rawName.split('@')[0].toLowerCase() === mName;
+        });
+        const displayName = typeof matchedMem === 'object' && matchedMem
+          ? (matchedMem.display_name || matchedMem.name || mName)
+          : String(matchedMem || mName);
+
         list.push({
-          name: matchedMem?.display_name || mName,
+          name: displayName,
           handle: mName,
           balance: bal
         });
@@ -656,14 +684,14 @@ export const Dashboard = () => {
                           fontWeight: 800,
                           fontSize: '0.85rem'
                         }}>
-                          {item.name.charAt(0).toUpperCase()}
+                          {(item.name || '?').charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>
-                            {item.name}
+                            {item.name || 'Member'}
                           </div>
                           <div style={{ fontSize: '0.74rem', color: heOwesMe ? '#10b981' : '#ef4444', fontWeight: 600 }}>
-                            {heOwesMe ? `Owes you ₹${item.balance.toFixed(2)}` : `You owe ₹${Math.abs(item.balance).toFixed(2)}`}
+                            {heOwesMe ? `Owes you ₹${Number(item.balance || 0).toFixed(2)}` : `You owe ₹${Math.abs(Number(item.balance || 0)).toFixed(2)}`}
                           </div>
                         </div>
                       </div>

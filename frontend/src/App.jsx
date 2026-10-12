@@ -42,6 +42,62 @@ const PageLoader = () => (
   </div>
 );
 
+// Global Error Boundary to prevent full-page blank crashes
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('ErrorBoundary caught error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem',
+          textAlign: 'center',
+          background: 'var(--bg-color, #0b0f19)',
+          color: 'var(--text-color, #fff)'
+        }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+            Something went wrong
+          </h2>
+          <p style={{ color: 'var(--text-dim, #94a3b8)', maxWidth: '420px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+            An unexpected error occurred while loading this view.
+          </p>
+          <button
+            onClick={() => {
+              this.setState({ hasError: false });
+              window.location.reload();
+            }}
+            style={{
+              padding: '0.65rem 1.5rem',
+              borderRadius: '12px',
+              background: 'var(--primary, #4f46e5)',
+              color: '#fff',
+              border: 'none',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -104,31 +160,33 @@ function App() {
       <AuthProvider>
         {/* Global update notification — appears on all pages after a new deploy */}
         <UpdateBanner />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<RootRedirect />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
-            {/* Protected Main App Layout */}
-            <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/expenses/new" element={<ExpenseForm />} />
-              <Route path="/squads" element={<Squads />} />
-              <Route path="/settlements" element={<Settlements />} />
-              <Route path="/settlement-details" element={<SettlementDetails />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/admin" element={<ProtectedRoute requireAdmin><CommandCentre /></ProtectedRoute>} />
-            </Route>
+              {/* Protected Main App Layout */}
+              <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/expenses" element={<Expenses />} />
+                <Route path="/expenses/new" element={<ExpenseForm />} />
+                <Route path="/squads" element={<Squads />} />
+                <Route path="/settlements" element={<Settlements />} />
+                <Route path="/settlement-details" element={<SettlementDetails />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/admin" element={<ProtectedRoute requireAdmin><CommandCentre /></ProtectedRoute>} />
+              </Route>
 
-            {/* Catch-all Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+              {/* Catch-all Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   );
