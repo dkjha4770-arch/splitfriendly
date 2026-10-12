@@ -74,6 +74,12 @@ export const Expenses = () => {
   });
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Modal State for Allocated Members Details Popup
+  const [membersModal, setMembersModal] = useState({
+    isOpen: false,
+    expense: null
+  });
+
   // Populate month list (last 24 months)
   const monthOptions = useMemo(() => {
     const options = [];
@@ -177,6 +183,70 @@ export const Expenses = () => {
     }
     return [];
   };
+
+  // Helper: Detailed member breakdown with shares for the popup modal
+  const getMembersDetails = useCallback((expense) => {
+    if (!expense) return [];
+    try {
+      const raw = expense.members;
+      let parsed = raw;
+      if (typeof raw === 'string') {
+        try {
+          parsed = JSON.parse(raw);
+        } catch {
+          if (raw.includes(',')) {
+            parsed = raw.split(',').map(s => s.trim()).filter(Boolean);
+          }
+        }
+      }
+
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return Object.entries(parsed).map(([name, shareAmount]) => ({
+          name: String(name).trim(),
+          share: Number(shareAmount) || 0,
+          isCustom: true
+        }));
+      } else if (Array.isArray(parsed)) {
+        const count = parsed.length || 1;
+        const equalShare = Number(expense.share) || (Number(expense.amount) / count);
+        return parsed.map(m => ({
+          name: String(m).trim(),
+          share: equalShare,
+          isCustom: false
+        }));
+      } else if (raw) {
+        return [{
+          name: String(raw).trim(),
+          share: Number(expense.amount) || 0,
+          isCustom: false
+        }];
+      }
+    } catch (_) {
+      if (expense.members) {
+        return [{
+          name: String(expense.members).trim(),
+          share: Number(expense.amount) || 0,
+          isCustom: false
+        }];
+      }
+    }
+    return [];
+  }, []);
+
+  // Handle ESC key to dismiss open modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (membersModal.isOpen) {
+          setMembersModal({ isOpen: false, expense: null });
+        } else if (deleteModal.isOpen && !isDeleting) {
+          setDeleteModal({ isOpen: false, id: null });
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [membersModal.isOpen, deleteModal.isOpen, isDeleting]);
 
   // Helper: Calculate user's share for an expense
   const getMyShare = useCallback((e) => {
@@ -713,15 +783,26 @@ export const Expenses = () => {
                       <td>
                         <div className="cell-members-wrap">
                           {membersList.slice(0, 3).map((m, idx) => (
-                            <span key={idx} className="member-chip">{m}</span>
+                            <button 
+                              key={idx} 
+                              type="button"
+                              className="member-chip"
+                              onClick={() => setMembersModal({ isOpen: true, expense: e })}
+                              title="Click to view all allocated members"
+                            >
+                              {m}
+                            </button>
                           ))}
                           {membersList.length > 3 && (
-                            <span 
+                            <button 
+                              type="button"
                               className="member-chip-more"
-                              title={membersList.join(', ')}
+                              onClick={() => setMembersModal({ isOpen: true, expense: e })}
+                              title={`Click to view all ${membersList.length} members`}
+                              aria-label={`Show all ${membersList.length} members`}
                             >
                               +{membersList.length - 3} more
-                            </span>
+                            </button>
                           )}
                           {membersList.length === 0 && (
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>-</span>
@@ -817,12 +898,32 @@ export const Expenses = () => {
                     <span className="card-split-label">Allocated to</span>
                     <div className="cell-members-wrap" style={{ justifyContent: 'flex-end', maxWidth: '180px' }}>
                       {membersList.slice(0, 3).map((m, idx) => (
-                        <span key={idx} className="member-chip">{m}</span>
+                        <button 
+                          key={idx} 
+                          type="button"
+                          className="member-chip"
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            setMembersModal({ isOpen: true, expense: e });
+                          }}
+                          title="Click to view all allocated members"
+                        >
+                          {m}
+                        </button>
                       ))}
                       {membersList.length > 3 && (
-                        <span className="member-chip-more" title={membersList.join(', ')}>
+                        <button 
+                          type="button"
+                          className="member-chip-more"
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            setMembersModal({ isOpen: true, expense: e });
+                          }}
+                          title={`Click to view all ${membersList.length} members`}
+                          aria-label={`Show all ${membersList.length} members`}
+                        >
                           +{membersList.length - 3}
-                        </span>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -844,6 +945,164 @@ export const Expenses = () => {
             );
           })}
         </div>
+      )}
+
+      {/* Allocated Members Popup Modal */}
+      {membersModal.isOpen && membersModal.expense && (
+        <ModalPortal>
+          <div 
+            className="members-modal-overlay" 
+            onClick={() => setMembersModal({ isOpen: false, expense: null })}
+          >
+            <div 
+              className="members-modal-card" 
+              onClick={e => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="members-modal-title"
+            >
+              {/* Modal Header */}
+              <div className="members-modal-header">
+                <div className="members-modal-title-wrap">
+                  <div className="members-modal-icon-badge">
+                    <Users size={22} />
+                  </div>
+                  <div>
+                    <h3 id="members-modal-title" className="members-modal-title">
+                      Allocated Members
+                    </h3>
+                    <p className="members-modal-subtitle">
+                      {membersModal.expense.where_spent || 'Expense Breakdown'}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  type="button"
+                  className="members-modal-btn-close"
+                  onClick={() => setMembersModal({ isOpen: false, expense: null })}
+                  title="Close dialog"
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Expense Summary Strip */}
+              <div className="members-modal-summary-strip">
+                <div className="summary-strip-main">
+                  <span className="summary-strip-amount">
+                    ₹ {Number(membersModal.expense.amount).toFixed(2)}
+                  </span>
+                  <div className="summary-strip-tags">
+                    <span className="summary-date-tag">
+                      <Calendar size={12} />
+                      {new Date(membersModal.expense.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    {CATEGORIES[membersModal.expense.category] && (
+                      <span 
+                        className="summary-cat-tag"
+                        style={{
+                          borderColor: `${CATEGORIES[membersModal.expense.category].color}40`,
+                          color: CATEGORIES[membersModal.expense.category].color,
+                          background: `${CATEGORIES[membersModal.expense.category].color}15`
+                        }}
+                      >
+                        <span 
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: CATEGORIES[membersModal.expense.category].color
+                          }} 
+                        />
+                        {CATEGORIES[membersModal.expense.category].label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="summary-payer-box">
+                  <span className="summary-payer-label">Paid by</span>
+                  <div className="summary-payer-row">
+                    <div className="payer-avatar-circle" style={{ width: '22px', height: '22px', fontSize: '0.7rem' }}>
+                      {(membersModal.expense.payer || '?')[0].toUpperCase()}
+                    </div>
+                    <span className="summary-payer-name">{membersModal.expense.payer}</span>
+                    {(membersModal.expense.payer || '').toLowerCase() === myHandle && (
+                      <span className="payer-self-tag">You</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Members List Section */}
+              {(() => {
+                const members = getMembersDetails(membersModal.expense);
+                const isCustom = members.some(m => m.isCustom);
+                const avgShare = Number(membersModal.expense.amount) / (members.length || 1);
+
+                return (
+                  <>
+                    <div className="members-modal-list-header">
+                      <div className="members-count-badge">
+                        <Users size={14} />
+                        <span>{members.length} {members.length === 1 ? 'Member' : 'Members'}</span>
+                      </div>
+                      <span className="members-split-type-note">
+                        {isCustom ? 'Custom Split' : `Equal Split (~₹ ${avgShare.toFixed(2)} / person)`}
+                      </span>
+                    </div>
+
+                    <div className="members-modal-list">
+                      {members.map((m, idx) => {
+                        const isMe = m.name.toLowerCase() === myHandle;
+                        const isPayer = m.name.toLowerCase() === (membersModal.expense.payer || '').toLowerCase();
+
+                        return (
+                          <div key={idx} className={`members-modal-item ${isMe ? 'is-self' : ''}`}>
+                            <div className="members-item-left">
+                              <div className="member-avatar-circle">
+                                {(m.name || '?')[0].toUpperCase()}
+                              </div>
+                              <div className="member-name-block">
+                                <div className="member-name-row">
+                                  <span className="member-display-name">{m.name}</span>
+                                  {isMe && <span className="member-badge-you">You</span>}
+                                  {isPayer && <span className="member-badge-payer">Payer</span>}
+                                </div>
+                                <span className="member-role-sub">
+                                  {isPayer && isMe ? 'Payer & Contributor' : isPayer ? 'Paid full amount' : 'Split contributor'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="members-item-right">
+                              <span className="member-share-val">
+                                ₹ {m.share.toFixed(2)}
+                              </span>
+                              <span className="member-share-sub">share</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* Modal Actions */}
+              <div className="members-modal-actions">
+                <button 
+                  type="button"
+                  className="btn-members-modal-done"
+                  onClick={() => setMembersModal({ isOpen: false, expense: null })}
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
       )}
 
       {/* Redesigned Delete Confirmation Modal */}
