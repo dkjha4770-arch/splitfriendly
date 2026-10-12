@@ -128,43 +128,63 @@ export const Expenses = () => {
 
   // Derive the current user's handle (username without @domain)
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+  const myUid = (user?.unique_id || '').toLowerCase();
 
   // Build set of squad names the current user belongs to
   const mySquadNames = useMemo(() => {
     return new Set(
       squads
         .filter(s => {
+          if (!s) return false;
           try {
             const mems = typeof s.members === 'string' ? JSON.parse(s.members || '[]') : s.members;
-            if (Array.isArray(mems)) return mems.some(m => String(m).toLowerCase() === myHandle);
-            if (mems && typeof mems === 'object') return Object.keys(mems).some(k => k.toLowerCase() === myHandle);
-          } catch (_) { /* ignore */ }
-          return false;
+            if (Array.isArray(mems)) {
+              return mems.some(m => {
+                const name = typeof m === 'object' && m ? (m.name || m.username || '') : String(m || '');
+                const handle = name.split('@')[0].toLowerCase();
+                const uid = typeof m === 'object' && m ? String(m.uid || '').toLowerCase() : '';
+                return handle === myHandle || (myUid !== '' && uid === myUid);
+              });
+            }
+            if (mems && typeof mems === 'object') {
+              return Object.keys(mems).some(k => k.split('@')[0].toLowerCase() === myHandle);
+            }
+          } catch (_) {
+            // ignore parse errors
+          }
+          // Squads returned by /api/expenses/data are already scoped to user's squads
+          return true;
         })
         .map(s => s.name)
+        .filter(Boolean)
     );
-  }, [squads, myHandle]);
+  }, [squads, myHandle, myUid]);
 
   // Helper: check if the current user is relevant to this expense
+  // If the expense belongs to a squad: user MUST be in that squad (otherwise do NOT show even if added to split)
   const isMyExpense = useCallback((e) => {
-    // 1. I am the payer
-    if ((e.payer || '').toLowerCase() === myHandle) return true;
+    if (!e) return false;
+    const squadName = e.squad_name || e.squad;
 
-    // 2. I am in the members list
+    // If assigned to a squad: user MUST belong to that squad
+    if (squadName) {
+      return mySquadNames.has(squadName);
+    }
+
+    // Direct / standalone expense (no squad): user must be payer or in split
+    const payer = String(e.payer || '').toLowerCase();
+    if (payer === myHandle) return true;
+
     try {
       const mems = typeof e.members === 'string' ? JSON.parse(e.members || '[]') : e.members;
       if (Array.isArray(mems)) {
-        if (mems.some(m => String(m).toLowerCase() === myHandle)) return true;
-      }
-      if (mems && typeof mems === 'object') {
-        if (Object.keys(mems).some(k => k.toLowerCase() === myHandle)) return true;
+        if (mems.some(m => String(m).split('@')[0].toLowerCase() === myHandle)) return true;
+      } else if (mems && typeof mems === 'object') {
+        if (Object.keys(mems).some(k => k.split('@')[0].toLowerCase() === myHandle)) return true;
       }
     } catch (_) {
       // ignore parse errors
     }
-
-    // 3. The expense belongs to a squad I am a member of
-    if (e.squad_name && mySquadNames.has(e.squad_name)) return true;
 
     return false;
   }, [myHandle, mySquadNames]);

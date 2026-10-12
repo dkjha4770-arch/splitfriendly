@@ -110,10 +110,82 @@ export const Dashboard = () => {
     }
   }, [token, fetchData]);
 
-  // Filtered expenses for selected month
+  const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+  const myUid = (user?.unique_id || '').toLowerCase();
+
+  // Set of squad names the current user belongs to
+  const mySquadNames = useMemo(() => {
+    return new Set(
+      squads
+        .filter(s => {
+          if (!s) return false;
+          try {
+            const mems = typeof s.members === 'string' ? JSON.parse(s.members || '[]') : s.members;
+            if (Array.isArray(mems)) {
+              return mems.some(m => {
+                const name = typeof m === 'object' && m ? (m.name || m.username || '') : String(m || '');
+                const handle = name.split('@')[0].toLowerCase();
+                const uid = typeof m === 'object' && m ? String(m.uid || '').toLowerCase() : '';
+                return handle === myHandle || (myUid !== '' && uid === myUid);
+              });
+            }
+            if (mems && typeof mems === 'object') {
+              return Object.keys(mems).some(k => k.split('@')[0].toLowerCase() === myHandle);
+            }
+          } catch (_) {
+            // ignore parse errors
+          }
+          // Squads returned by /api/expenses/data are already scoped to user's squads
+          return true;
+        })
+        .map(s => s.name)
+        .filter(Boolean)
+    );
+  }, [squads, myHandle, myUid]);
+
+  // Squads the user belongs to
+  const userSquads = useMemo(() => {
+    return squads.filter(s => s && mySquadNames.has(s.name));
+  }, [squads, mySquadNames]);
+
+  // Helper: check if expense is collective to user's squads or direct split
+  // If an expense belongs to a squad: user MUST be in that squad (otherwise do NOT show even if added to split)
+  const isMyExpense = useCallback((e) => {
+    if (!e) return false;
+    const squadName = e.squad_name || e.squad;
+
+    // If assigned to a squad: user MUST belong to that squad
+    if (squadName) {
+      return mySquadNames.has(squadName);
+    }
+
+    // Direct / standalone expense (no squad): user must be payer or in split
+    const payer = String(e.payer || '').toLowerCase();
+    if (payer === myHandle) return true;
+
+    try {
+      const mems = typeof e.members === 'string' ? JSON.parse(e.members || '[]') : e.members;
+      if (Array.isArray(mems)) {
+        if (mems.some(m => String(m).split('@')[0].toLowerCase() === myHandle)) return true;
+      } else if (mems && typeof mems === 'object') {
+        if (Object.keys(mems).some(k => k.split('@')[0].toLowerCase() === myHandle)) return true;
+      }
+    } catch (_) {
+      // ignore parse errors
+    }
+
+    return false;
+  }, [myHandle, mySquadNames]);
+
+  // Filtered expenses for selected month (scoped collectively to user's squads)
   const monthlyExpenses = useMemo(() => {
-    return expenses.filter(e => e && e.date && String(e.date).substring(0, 7) === selectedMonth);
-  }, [expenses, selectedMonth]);
+    return expenses.filter(e =>
+      e &&
+      e.date &&
+      String(e.date).substring(0, 7) === selectedMonth &&
+      isMyExpense(e)
+    );
+  }, [expenses, selectedMonth, isMyExpense]);
 
   // Volume & entry count (excluding settlements)
   const activeExpenses = useMemo(() => {
@@ -125,7 +197,6 @@ export const Dashboard = () => {
   }, [activeExpenses]);
 
   const totalEntries = activeExpenses.length;
-  const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
 
   // Handle ESC key to dismiss settlement modal
   useEffect(() => {
@@ -630,7 +701,7 @@ export const Dashboard = () => {
               </div>
 
               {/* Squad Selector */}
-              {squads.length > 0 && (
+              {userSquads.length > 0 && (
                 <select
                   value={selectedSquadForSettlements || ''}
                   onChange={e => setSelectedSquadForSettlements(e.target.value)}
@@ -646,7 +717,7 @@ export const Dashboard = () => {
                     outline: 'none'
                   }}
                 >
-                  {squads.map(s => (
+                  {userSquads.map(s => (
                     <option key={s.id || s._id} value={s.name}>{s.name}</option>
                   ))}
                 </select>
@@ -794,7 +865,7 @@ export const Dashboard = () => {
             <div className="dashboard-hub-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
               <Users size={22} />
             </div>
-            <span className="dashboard-hub-badge">{squads.length} Squads</span>
+            <span className="dashboard-hub-badge">{userSquads.length} Squads</span>
           </div>
           <div className="dashboard-hub-main">
             <h4>Squads & Groups</h4>

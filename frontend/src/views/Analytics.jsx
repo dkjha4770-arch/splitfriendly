@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   TrendingUp, 
@@ -79,10 +79,21 @@ export const Analytics = () => {
     }
   }, [token, fetchData]);
 
-  // Compute stats for current filters
-  const filteredBySquad = expenses.filter(e => squadFilter === 'all' || e.squad_name === squadFilter);
-  const monthlyExpenses = filteredBySquad.filter(e => e.date.substring(0, 7) === selectedMonth);
-  const activeMonthlyExpenses = monthlyExpenses.filter(e => e.category !== 'settlement');
+  const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+  const mySquadNames = useMemo(() => new Set(squads.map(s => s?.name).filter(Boolean)), [squads]);
+
+  // Compute stats for current filters (scoped to user's squads)
+  const filteredBySquad = expenses.filter(e => {
+    if (!e) return false;
+    const sq = e.squad_name || e.squad;
+    if (squadFilter !== 'all') {
+      return sq === squadFilter;
+    }
+    if (sq) return mySquadNames.has(sq);
+    return String(e.payer || '').toLowerCase() === myHandle;
+  });
+  const monthlyExpenses = filteredBySquad.filter(e => e && e.date && String(e.date).substring(0, 7) === selectedMonth);
+  const activeMonthlyExpenses = monthlyExpenses.filter(e => e && e.category !== 'settlement');
 
   // 1. Total spent this month
   const totalVolume = activeMonthlyExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
