@@ -65,7 +65,7 @@ export const Expenses = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [payerFilter, setPayerFilter] = useState('all'); // 'all', 'me', 'others'
   const [sortBy, setSortBy] = useState('date-desc'); // 'date-desc', 'date-asc', 'amount-desc', 'amount-asc'
-  const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
+  const [viewMode, setViewMode] = useState('grid'); // Default to 'grid' (cards view), or 'table'
 
   // Modal State for Confirm Delete
   const [deleteModal, setDeleteModal] = useState({
