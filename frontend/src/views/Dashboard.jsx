@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModalPortal from '../components/ModalPortal';
 import { getExpensesData, getCachedExpensesData, invalidateExpensesCache } from '../utils/dataCache';
 import {
   Plus,
-  Search,
-  Trash2,
   DollarSign,
-  Activity,
   TrendingUp,
-  ArrowUpRight,
   ArrowDownRight,
   Calendar,
   Users,
@@ -22,14 +18,11 @@ import {
   X,
   ChevronRight,
   Receipt,
-  Sparkles,
-  List,
-  LayoutGrid
+  Sparkles
 } from 'lucide-react';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 import './Dashboard.css';
-import './Expenses.css';
 
 const CATEGORIES = {
   food: { label: 'Food & Rations', color: '#f59e0b' },
@@ -39,18 +32,9 @@ const CATEGORIES = {
   other: { label: 'Unclassified / Other', color: '#8b5cf6' }
 };
 
-const PAYMENT_APPS = {
-  gpay: { label: 'Google Pay', badge: 'badge-purple' },
-  phonepe: { label: 'PhonePe', badge: 'badge-purple' },
-  slice: { label: 'Slice Card', badge: 'badge-green' },
-  cash: { label: 'Cash Reserve', badge: 'badge-green' },
-  upi: { label: 'UPI Direct', badge: 'badge-purple' }
-};
-
 export const Dashboard = () => {
   const { user, token, theme } = useAuth();
   const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
-  const navigate = useNavigate();
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
@@ -68,12 +52,9 @@ export const Dashboard = () => {
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     return `${yyyy}-${mm}`;
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [selectedSquadForSettlements, setSelectedSquadForSettlements] = useState(() => {
     return initialCache?.squads?.[0]?.name || null;
   });
-  const [viewMode, setViewMode] = useState('grid'); // Default to 'grid' (cards view), or 'table'
 
   // Modal State for Confirm Settle
   const [settlementModal, setSettlementModal] = useState({
@@ -82,18 +63,6 @@ export const Dashboard = () => {
     otherUser: '',
     amount: 0,
     heOwesMe: false
-  });
-
-  // Modal State for Confirm Delete
-  const [deleteModal, setDeleteModal] = useState({
-    isOpen: false,
-    id: null
-  });
-
-  // Modal State for Allocated Members Details Popup
-  const [membersModal, setMembersModal] = useState({
-    isOpen: false,
-    expense: null
   });
 
   // Populate month list (last 24 months)
@@ -144,22 +113,6 @@ export const Dashboard = () => {
     return expenses.filter(e => e.date.substring(0, 7) === selectedMonth);
   }, [expenses, selectedMonth]);
 
-  // Search & category filters (settlements are always excluded from the ledger table)
-  const filteredExpenses = useMemo(() => {
-    return monthlyExpenses.filter(e => {
-      if (e.category === 'settlement') return false;
-
-      const matchesSearch =
-        e.where_spent.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        e.payer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (e.squad_name && e.squad_name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
-
-      return matchesSearch && matchesCategory;
-    });
-  }, [monthlyExpenses, searchQuery, categoryFilter]);
-
   // Volume & entry count (excluding settlements)
   const activeExpenses = useMemo(() => {
     return monthlyExpenses.filter(e => e.category !== 'settlement');
@@ -172,84 +125,16 @@ export const Dashboard = () => {
   const totalEntries = activeExpenses.length;
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
 
-  // Helper: parse members cleanly
-  const parseMembers = (members) => {
-    try {
-      const parsed = typeof members === 'string' ? JSON.parse(members || '[]') : members;
-      if (Array.isArray(parsed)) {
-        return parsed.map(m => String(m));
-      } else if (parsed && typeof parsed === 'object') {
-        return Object.keys(parsed).map(k => String(k));
-      }
-    } catch (_) {
-      return members ? [String(members)] : [];
-    }
-    return [];
-  };
-
-  // Helper: Detailed member breakdown with shares for the popup modal
-  const getMembersDetails = useCallback((expense) => {
-    if (!expense) return [];
-    try {
-      const raw = expense.members;
-      let parsed = raw;
-      if (typeof raw === 'string') {
-        try {
-          parsed = JSON.parse(raw);
-        } catch {
-          if (raw.includes(',')) {
-            parsed = raw.split(',').map(s => s.trim()).filter(Boolean);
-          }
-        }
-      }
-
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        return Object.entries(parsed).map(([name, shareAmount]) => ({
-          name: String(name).trim(),
-          share: Number(shareAmount) || 0,
-          isCustom: true
-        }));
-      } else if (Array.isArray(parsed)) {
-        const count = parsed.length || 1;
-        const equalShare = Number(expense.share) || (Number(expense.amount) / count);
-        return parsed.map(m => ({
-          name: String(m).trim(),
-          share: equalShare,
-          isCustom: false
-        }));
-      } else if (raw) {
-        return [{
-          name: String(raw).trim(),
-          share: Number(expense.amount) || 0,
-          isCustom: false
-        }];
-      }
-    } catch (_) {
-      if (expense.members) {
-        return [{
-          name: String(expense.members).trim(),
-          share: Number(expense.amount) || 0,
-          isCustom: false
-        }];
-      }
-    }
-    return [];
-  }, []);
-
-  // Handle ESC key to dismiss open modals
+  // Handle ESC key to dismiss settlement modal
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        if (membersModal.isOpen) {
-          setMembersModal({ isOpen: false, expense: null });
-        } else if (deleteModal.isOpen) {
-          setDeleteModal({ isOpen: false, id: null });
-        }
+      if (e.key === 'Escape' && settlementModal.isOpen) {
+        setSettlementModal(prev => ({ ...prev, isOpen: false }));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [membersModal.isOpen, deleteModal.isOpen]);
+  }, [settlementModal.isOpen]);
 
   // Calculate Net Personal Balance (spent vs share in selected month)
   const { totalSpent, totalShare, categoryTotals, netBalance } = useMemo(() => {
@@ -469,35 +354,6 @@ export const Dashboard = () => {
     }
   };
 
-  // Delete Action
-  const triggerDelete = (id) => {
-    setDeleteModal({
-      isOpen: true,
-      id
-    });
-  };
-
-  const executeDelete = async () => {
-    try {
-      const res = await fetch('/api/expenses/delete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders
-        },
-        body: JSON.stringify({ id: deleteModal.id })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Delete failed.');
-
-      setDeleteModal({ isOpen: false, id: null });
-      invalidateExpensesCache();
-      fetchData(true);
-    } catch (err) {
-      alert('Delete failed: ' + err.message);
-    }
-  };
-
   const displayName = user?.display_name || myHandle || 'Operative';
 
   return (
@@ -519,31 +375,11 @@ export const Dashboard = () => {
             Welcome back, {displayName}
           </h2>
           <p className="dashboard-subtitle-text">
-            Here is your financial snapshot and squad expense ledger for this cycle.
+            Executive overview of your cycle spending, category allocations, and squad settlements.
           </p>
         </div>
 
         <div className="header-actions dashboard-hero-actions">
-          {/* Quick Search */}
-          <div className="search-bar dashboard-search-wrap">
-            <Search size={16} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
-            <input
-              type="text"
-              placeholder="Search expenses, payers..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="dashboard-search-input"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: 'var(--text-dim)' }}
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-
           {/* Month Selector */}
           <div className="dashboard-month-select-wrap">
             <Calendar size={16} style={{ position: 'absolute', left: '0.85rem', color: 'var(--text-dim)', pointerEvents: 'none' }} />
@@ -558,6 +394,16 @@ export const Dashboard = () => {
             </select>
             <ChevronRight size={14} style={{ position: 'absolute', right: '0.75rem', transform: 'rotate(90deg)', color: 'var(--text-dim)', pointerEvents: 'none' }} />
           </div>
+
+          {/* Direct Link to Expense Ledger */}
+          <Link
+            to="/expenses"
+            className="dashboard-ledger-btn"
+            title="Open expense ledger"
+          >
+            <Receipt size={16} />
+            <span>Expense Ledger</span>
+          </Link>
 
           {/* New Expense Button */}
           <Link
@@ -659,391 +505,17 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* ── 2-COLUMN MAIN WORKSPACE GRID ── */}
+      {/* ── 2-COLUMN BALANCED WORKSPACE GRID ── */}
       <div className="dashboard-workspace-grid">
 
-        {/* ── LEFT COLUMN: LEDGER / RECENT ACTIVITY ── */}
-        <div className="dashboard-left-col">
-          
-          <div className="card tactical-ledger-card">
-            
-            {/* Header + Actions */}
-            <div className="tactical-ledger-header">
-              <div className="tactical-header-info">
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-color)' }}>
-                  Tactical Ledger
-                </h3>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)', fontWeight: 500 }}>
-                  Showing {filteredExpenses.length} of {activeExpenses.length} expenses
-                </span>
+        {/* ── COLUMN 1: SPENDING DISTRIBUTION ── */}
+        <div className="card dashboard-workspace-card">
+          <div>
+            <div className="dashboard-card-header">
+              <div className="dashboard-card-title-group">
+                <h3 className="dashboard-card-title">Spending Distribution</h3>
+                <span className="dashboard-card-subtext">Category breakdown of active operations</span>
               </div>
-
-              <div className="tactical-header-actions">
-                {/* View Mode Segment Toggle */}
-                <div className="ledger-segment-group">
-                  <button 
-                    className={`ledger-segment-btn ${viewMode === 'table' ? 'active' : ''}`}
-                    onClick={() => setViewMode('table')}
-                    title="Table View"
-                  >
-                    <List size={14} />
-                    <span>Table</span>
-                  </button>
-                  <button 
-                    className={`ledger-segment-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                    onClick={() => setViewMode('grid')}
-                    title="Card View"
-                  >
-                    <LayoutGrid size={14} />
-                    <span>Cards</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Category Filter Chips */}
-            <div className="tactical-chips-scroll" style={{ marginBottom: '1.25rem' }}>
-              <button
-                onClick={() => setCategoryFilter('all')}
-                className={`tactical-chip-btn ${categoryFilter === 'all' ? 'active' : ''}`}
-              >
-                All Ops ({activeExpenses.length})
-              </button>
-              {Object.keys(CATEGORIES).map(k => {
-                const count = activeExpenses.filter(e => e.category === k).length;
-                const isActive = categoryFilter === k;
-                return (
-                  <button
-                    key={k}
-                    onClick={() => setCategoryFilter(k)}
-                    className={`tactical-chip-btn ${isActive ? 'active' : ''}`}
-                    style={{
-                      borderColor: isActive ? CATEGORIES[k].color : 'var(--border-color)',
-                      color: isActive ? CATEGORIES[k].color : 'var(--text-dim)',
-                      background: isActive ? `${CATEGORIES[k].color}18` : 'transparent'
-                    }}
-                  >
-                    {CATEGORIES[k].label} {count > 0 && `(${count})`}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Table or Empty State */}
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-dim)' }}>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  border: '3px solid var(--border-color)',
-                  borderTopColor: 'var(--primary)',
-                  borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite',
-                  margin: '0 auto 1rem auto'
-                }} />
-                <p style={{ fontSize: '0.88rem', fontWeight: 600 }}>Syncing tactical ledger...</p>
-              </div>
-            ) : filteredExpenses.length === 0 ? (
-              <div style={{
-                textAlign: 'center',
-                padding: '3.5rem 1.5rem',
-                background: 'rgba(255, 255, 255, 0.01)',
-                borderRadius: '16px',
-                border: '1px dashed var(--border-color)'
-              }}>
-                <Receipt size={40} style={{ color: 'var(--text-dim)', margin: '0 auto 0.75rem auto', opacity: 0.6 }} />
-                <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: '0 0 0.35rem 0' }}>No Expenses Found</h4>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', maxWidth: '300px', margin: '0 auto 1.25rem auto' }}>
-                  {searchQuery || categoryFilter !== 'all'
-                    ? 'No records match your active search or category filters.'
-                    : 'No operational expenses logged for this monthly segment yet.'}
-                </p>
-                <Link
-                  to="/expenses/new"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    background: 'var(--primary)',
-                    color: '#fff',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '10px',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    textDecoration: 'none'
-                  }}
-                >
-                  <Plus size={15} />
-                  <span>Log First Expense</span>
-                </Link>
-              </div>
-            ) : viewMode === 'table' ? (
-              <div className="dashboard-table-scroll-wrap no-card-layout">
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-                  <thead>
-                    <tr style={{
-                      borderBottom: '1px solid var(--border-color)',
-                      color: 'var(--text-dim)',
-                      fontSize: '0.72rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.6px'
-                    }}>
-                      <th style={{ padding: '0.85rem 1rem', fontWeight: 800 }}>Date</th>
-                      <th style={{ padding: '0.85rem 1rem', fontWeight: 800 }}>Description</th>
-                      <th style={{ padding: '0.85rem 1rem', fontWeight: 800 }}>Payer</th>
-                      <th style={{ padding: '0.85rem 1rem', fontWeight: 800 }}>Category</th>
-                      <th style={{ padding: '0.85rem 1rem', fontWeight: 800 }}>Payment</th>
-                      <th style={{ padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'right' }}>Amount</th>
-                      <th style={{ padding: '0.85rem 0.5rem', width: '36px' }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredExpenses.map((e, idx) => {
-                      const isEven = idx % 2 === 0;
-                      return (
-                        <tr
-                          key={e.id}
-                          style={{
-                            borderBottom: '1px solid var(--border-color)',
-                            background: isEven ? 'transparent' : 'rgba(255, 255, 255, 0.015)',
-                            transition: 'background 0.15s ease'
-                          }}
-                        >
-                          <td style={{ padding: '0.9rem 1rem', whiteSpace: 'nowrap', color: 'var(--text-dim)', fontWeight: 600, fontSize: '0.82rem' }}>
-                            {new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                          </td>
-                          <td style={{ padding: '0.9rem 1rem', minWidth: '160px' }}>
-                            <div style={{ fontWeight: 700, color: 'var(--text-color)', marginBottom: '0.15rem' }}>
-                              {e.where_spent}
-                            </div>
-                            {e.squad_name && (
-                              <span style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                                fontSize: '0.68rem',
-                                color: 'var(--primary)',
-                                fontWeight: 800,
-                                background: 'rgba(79, 70, 229, 0.1)',
-                                padding: '0.1rem 0.45rem',
-                                borderRadius: '4px'
-                              }}>
-                                <Users size={10} />
-                                {e.squad_name.toUpperCase()}
-                              </span>
-                            )}
-                          </td>
-                          <td style={{ padding: '0.9rem 1rem', whiteSpace: 'nowrap' }}>
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem',
-                              fontWeight: 600,
-                              textTransform: 'capitalize',
-                              color: 'var(--text-color)'
-                            }}>
-                              <span style={{
-                                width: '22px',
-                                height: '22px',
-                                borderRadius: '6px',
-                                background: 'var(--primary)',
-                                color: '#fff',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '0.68rem',
-                                fontWeight: 800
-                              }}>
-                                {e.payer.charAt(0).toUpperCase()}
-                              </span>
-                              {e.payer}
-                            </span>
-                          </td>
-                          <td style={{ padding: '0.9rem 1rem', whiteSpace: 'nowrap' }}>
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.4rem',
-                              padding: '0.25rem 0.6rem',
-                              borderRadius: '8px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              border: `1px solid ${CATEGORIES[e.category]?.color || '#868e96'}35`,
-                              background: `${CATEGORIES[e.category]?.color || '#868e96'}12`,
-                              color: CATEGORIES[e.category]?.color || 'var(--text-dim)'
-                            }}>
-                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: CATEGORIES[e.category]?.color || '#868e96' }} />
-                              {CATEGORIES[e.category]?.label || e.category}
-                            </span>
-                          </td>
-                          <td style={{ padding: '0.9rem 1rem', whiteSpace: 'nowrap' }}>
-                            <span className={`app-badge ${PAYMENT_APPS[e.payment_app]?.badge || 'badge-purple'}`} style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', borderRadius: '8px' }}>
-                              {PAYMENT_APPS[e.payment_app]?.label || e.payment_app}
-                            </span>
-                          </td>
-                          <td style={{ padding: '0.9rem 1rem', textAlign: 'right', fontWeight: 900, fontSize: '0.95rem', color: 'var(--text-color)', whiteSpace: 'nowrap' }}>
-                            ₹ {Number(e.amount).toFixed(2)}
-                          </td>
-                          <td style={{ padding: '0.9rem 0.5rem', textAlign: 'center' }}>
-                            <button
-                              onClick={() => triggerDelete(e.id)}
-                              title="Delete entry"
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: 'var(--text-dim)',
-                                padding: '6px',
-                                borderRadius: '6px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.15s ease'
-                              }}
-                              onMouseEnter={el => el.currentTarget.style.color = '#ef4444'}
-                              onMouseLeave={el => el.currentTarget.style.color = 'var(--text-dim)'}
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              /* Redesigned Card / Grid View */
-              <div className="ledger-cards-grid">
-                {filteredExpenses.map(e => {
-                  const membersList = parseMembers(e.members);
-                  const isPayerMe = (e.payer || '').toLowerCase() === myHandle;
-                  const catColor = CATEGORIES[e.category]?.color || '#868e96';
-
-                  return (
-                    <div key={e.id} className="ledger-expense-card">
-                      <div className="card-top-bar">
-                        <div className="card-date-badge">
-                          <Calendar size={12} />
-                          <span>{new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                        </div>
-                        <span 
-                          className="ledger-cat-badge"
-                          style={{
-                            borderColor: `${catColor}35`,
-                            background: `${catColor}12`,
-                            color: catColor
-                          }}
-                        >
-                          <span 
-                            className="ledger-cat-dot" 
-                            style={{ background: catColor }}
-                          />
-                          {CATEGORIES[e.category]?.label || e.category}
-                        </span>
-                      </div>
-
-                      <div className="card-main-info">
-                        <h4 className="card-objective-title">{e.where_spent}</h4>
-                        <div className="card-amount-large">
-                          ₹ {Number(e.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </div>
-
-                        <div className="card-metadata-pills">
-                          {e.squad_name && (
-                            <span className="cell-squad-badge">
-                              <Users size={11} />
-                              Squad: {e.squad_name}
-                            </span>
-                          )}
-                          <span className={`ledger-app-badge ${PAYMENT_APPS[e.payment_app]?.badge || 'app-badge-green'}`}>
-                            {PAYMENT_APPS[e.payment_app]?.label || e.payment_app}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="card-split-section">
-                        <div className="card-split-row">
-                          <span className="card-split-label">Payer</span>
-                          <div className="cell-payer-pill">
-                            <div className="payer-avatar-circle" style={{ width: '20px', height: '20px', fontSize: '0.65rem' }}>
-                              {(e.payer || '?')[0].toUpperCase()}
-                            </div>
-                            <span>{e.payer}</span>
-                            {isPayerMe && <span className="payer-self-tag">You</span>}
-                          </div>
-                        </div>
-
-                        <div className="card-split-row" style={{ alignItems: 'flex-start', marginTop: '0.2rem' }}>
-                          <span className="card-split-label">Allocated to</span>
-                          <div className="cell-members-wrap" style={{ justifyContent: 'flex-end', maxWidth: '180px' }}>
-                            {membersList.slice(0, 3).map((m, idx) => (
-                              <button 
-                                key={idx} 
-                                type="button"
-                                className="member-chip"
-                                onClick={(ev) => {
-                                  ev.stopPropagation();
-                                  setMembersModal({ isOpen: true, expense: e });
-                                }}
-                                title="Click to view all allocated members"
-                              >
-                                {m}
-                              </button>
-                            ))}
-                            {membersList.length > 3 && (
-                              <button 
-                                type="button"
-                                className="member-chip-more"
-                                onClick={(ev) => {
-                                  ev.stopPropagation();
-                                  setMembersModal({ isOpen: true, expense: e });
-                                }}
-                                title={`Click to view all ${membersList.length} members`}
-                                aria-label={`Show all ${membersList.length} members`}
-                              >
-                                +{membersList.length - 3}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="card-footer">
-                        <span>
-                          {e.created_at ? 'Logged ' + new Date(e.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Logged'}
-                        </span>
-                        <button 
-                          className="btn-delete-row"
-                          onClick={() => triggerDelete(e.id)}
-                          title="Delete entry"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── RIGHT COLUMN: CHARTS & SQUAD QUICK SETTLEMENTS ── */}
-        <div className="dashboard-right-col">
-
-          {/* Widget 1: Category Breakdown Doughnut Chart */}
-          <div className="card" style={{
-            borderRadius: '20px',
-            padding: '1.5rem',
-            background: 'var(--card-bg)',
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--shadow)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: 'var(--text-color)' }}>
-                Spending Distribution
-              </h3>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {activeExpenses.length} Ops
               </span>
@@ -1051,12 +523,12 @@ export const Dashboard = () => {
 
             {Object.keys(categoryTotals).length > 0 ? (
               <div>
-                <div style={{ position: 'relative', width: '100%', height: '200px', marginBottom: '1.25rem' }}>
+                <div style={{ position: 'relative', width: '100%', height: '210px', marginBottom: '1.25rem' }}>
                   <canvas ref={chartRef}></canvas>
                 </div>
 
                 {/* Custom Category List with Percentages */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                   {Object.entries(categoryTotals).map(([catKey, val]) => {
                     const cat = CATEGORIES[catKey] || { label: catKey, color: '#8b5cf6' };
                     const pct = totalVolume > 0 ? ((val / totalVolume) * 100).toFixed(0) : 0;
@@ -1067,9 +539,10 @@ export const Dashboard = () => {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          padding: '0.45rem 0.65rem',
-                          borderRadius: '8px',
+                          padding: '0.55rem 0.75rem',
+                          borderRadius: '10px',
                           background: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid var(--border-color)',
                           fontSize: '0.82rem'
                         }}
                       >
@@ -1098,9 +571,9 @@ export const Dashboard = () => {
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
                 <Info size={32} style={{ color: 'var(--text-dim)', margin: '0 auto 0.75rem auto', opacity: 0.5 }} />
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>No Expense Categories</h4>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0', color: 'var(--text-color)' }}>No Expense Categories</h4>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: 0 }}>
                   Log an expense to visualize category distributions.
                 </p>
@@ -1108,22 +581,24 @@ export const Dashboard = () => {
             )}
           </div>
 
-          {/* Widget 2: Squad Quick Settlements Card */}
-          <div className="card" style={{
-            borderRadius: '20px',
-            padding: '1.5rem',
-            background: 'var(--card-bg)',
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--shadow)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: 'var(--text-color)' }}>
-                  Squad Settlements
-                </h3>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 600 }}>
-                  Active balances calculated all-time
-                </span>
+          <div className="dashboard-card-footer">
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+              Total Volume: <strong style={{ color: 'var(--text-color)' }}>₹{totalVolume.toFixed(2)}</strong>
+            </span>
+            <Link to="/analytics" className="dashboard-card-footer-link">
+              <span>Deep Analytics</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+
+        {/* ── COLUMN 2: SQUAD QUICK SETTLEMENTS ── */}
+        <div className="card dashboard-workspace-card">
+          <div>
+            <div className="dashboard-card-header">
+              <div className="dashboard-card-title-group">
+                <h3 className="dashboard-card-title">Squad Quick Settlements</h3>
+                <span className="dashboard-card-subtext">Zero-out debts with single-click reconciliation</span>
               </div>
 
               {/* Squad Selector */}
@@ -1132,18 +607,19 @@ export const Dashboard = () => {
                   value={selectedSquadForSettlements || ''}
                   onChange={e => setSelectedSquadForSettlements(e.target.value)}
                   style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '8px',
-                    fontSize: '0.75rem',
+                    padding: '0.4rem 0.85rem',
+                    borderRadius: '10px',
+                    fontSize: '0.78rem',
                     fontWeight: 700,
                     background: 'var(--input-bg)',
                     border: '1px solid var(--border-color)',
                     color: 'var(--text-color)',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    outline: 'none'
                   }}
                 >
                   {squads.map(s => (
-                    <option key={s.id} value={s.name}>{s.name}</option>
+                    <option key={s.id || s._id} value={s.name}>{s.name}</option>
                   ))}
                 </select>
               )}
@@ -1160,32 +636,33 @@ export const Dashboard = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '0.75rem 0.9rem',
-                        borderRadius: '12px',
+                        padding: '0.85rem 1rem',
+                        borderRadius: '14px',
                         background: heOwesMe ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)',
-                        border: `1px solid ${heOwesMe ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
+                        border: `1px solid ${heOwesMe ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                        transition: 'transform 0.15s ease'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '8px',
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '10px',
                           background: heOwesMe ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
                           color: heOwesMe ? '#10b981' : '#ef4444',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontWeight: 800,
-                          fontSize: '0.8rem'
+                          fontSize: '0.85rem'
                         }}>
                           {item.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-color)' }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>
                             {item.name}
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: heOwesMe ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                          <div style={{ fontSize: '0.74rem', color: heOwesMe ? '#10b981' : '#ef4444', fontWeight: 600 }}>
                             {heOwesMe ? `Owes you ₹${item.balance.toFixed(2)}` : `You owe ₹${Math.abs(item.balance).toFixed(2)}`}
                           </div>
                         </div>
@@ -1197,20 +674,20 @@ export const Dashboard = () => {
                           background: heOwesMe ? '#10b981' : 'var(--primary)',
                           color: '#ffffff',
                           border: 'none',
-                          padding: '0.4rem 0.85rem',
-                          borderRadius: '8px',
-                          fontSize: '0.75rem',
+                          padding: '0.45rem 0.95rem',
+                          borderRadius: '9px',
+                          fontSize: '0.78rem',
                           fontWeight: 700,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '0.3rem',
-                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
-                          transition: 'transform 0.15s ease'
+                          gap: '0.35rem',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                          transition: 'all 0.15s ease'
                         }}
                       >
                         <span>Settle</span>
-                        <ChevronRight size={12} />
+                        <ChevronRight size={13} />
                       </button>
                     </div>
                   );
@@ -1219,24 +696,87 @@ export const Dashboard = () => {
             ) : (
               <div style={{
                 textAlign: 'center',
-                padding: '2rem 1rem',
+                padding: '2.5rem 1rem',
                 background: 'rgba(16, 185, 129, 0.03)',
-                borderRadius: '12px',
+                borderRadius: '14px',
                 border: '1px dashed rgba(16, 185, 129, 0.25)'
               }}>
-                <CheckCircle2 size={32} style={{ color: '#10b981', margin: '0 auto 0.5rem auto' }} />
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-color)', margin: '0 0 0.25rem 0' }}>
+                <CheckCircle2 size={36} style={{ color: '#10b981', margin: '0 auto 0.6rem auto' }} />
+                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-color)', margin: '0 0 0.3rem 0' }}>
                   All Clear in {selectedSquadForSettlements || 'Squad'}
                 </h4>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: 0 }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: 0 }}>
                   No pending balances or unsettled liabilities.
                 </p>
               </div>
             )}
           </div>
 
+          <div className="dashboard-card-footer">
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+              Active Squad: <strong style={{ color: 'var(--text-color)' }}>{selectedSquadForSettlements || 'None'}</strong>
+            </span>
+            <Link to="/settlements" className="dashboard-card-footer-link">
+              <span>Settlement Archive</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
 
+      </div>
+
+      {/* ── 3-COLUMN QUICK ACCESS NAVIGATION HUB ── */}
+      <div className="dashboard-quick-hub">
+        <Link to="/expenses" className="dashboard-hub-card">
+          <div className="dashboard-hub-top">
+            <div className="dashboard-hub-icon-wrap" style={{ background: 'rgba(79, 70, 229, 0.12)', color: 'var(--primary)' }}>
+              <Receipt size={22} />
+            </div>
+            <span className="dashboard-hub-badge">{activeExpenses.length} Records</span>
+          </div>
+          <div className="dashboard-hub-main">
+            <h4>Expense Ledger</h4>
+            <p>Access the dedicated high-density ledger with table and card view layouts, advanced filters, and search.</p>
+          </div>
+          <div className="dashboard-hub-cta">
+            <span>Open Full Ledger</span>
+            <ArrowRight size={14} />
+          </div>
+        </Link>
+
+        <Link to="/settlements" className="dashboard-hub-card">
+          <div className="dashboard-hub-top">
+            <div className="dashboard-hub-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+              <CheckCircle2 size={22} />
+            </div>
+            <span className="dashboard-hub-badge">Reconciliation</span>
+          </div>
+          <div className="dashboard-hub-main">
+            <h4>Settlement Archive</h4>
+            <p>Review past debt reconciliations, verify payment receipts, and audit historical settlement logs.</p>
+          </div>
+          <div className="dashboard-hub-cta">
+            <span>View Archive</span>
+            <ArrowRight size={14} />
+          </div>
+        </Link>
+
+        <Link to="/squads" className="dashboard-hub-card">
+          <div className="dashboard-hub-top">
+            <div className="dashboard-hub-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
+              <Users size={22} />
+            </div>
+            <span className="dashboard-hub-badge">{squads.length} Squads</span>
+          </div>
+          <div className="dashboard-hub-main">
+            <h4>Squads & Groups</h4>
+            <p>Organize squad rosters, invite comrades, and manage member permissions and group split rules.</p>
+          </div>
+          <div className="dashboard-hub-cta">
+            <span>Manage Squads</span>
+            <ArrowRight size={14} />
+          </div>
+        </Link>
       </div>
 
       {/* ── MODALS (PORTAL RENDERED) ── */}
@@ -1330,251 +870,6 @@ export const Dashboard = () => {
                   }}
                 >
                   Confirm & Settle
-                </button>
-              </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
-
-      {/* Allocated Members Popup Modal */}
-      {membersModal.isOpen && membersModal.expense && (
-        <ModalPortal>
-          <div 
-            className="members-modal-overlay" 
-            onClick={() => setMembersModal({ isOpen: false, expense: null })}
-          >
-            <div 
-              className="members-modal-card" 
-              onClick={e => e.stopPropagation()}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="dashboard-members-modal-title"
-            >
-              {/* Modal Header */}
-              <div className="members-modal-header">
-                <div className="members-modal-title-wrap">
-                  <div className="members-modal-icon-badge">
-                    <Users size={22} />
-                  </div>
-                  <div>
-                    <h3 id="dashboard-members-modal-title" className="members-modal-title">
-                      Allocated Members
-                    </h3>
-                    <p className="members-modal-subtitle">
-                      {membersModal.expense.where_spent || 'Expense Breakdown'}
-                    </p>
-                  </div>
-                </div>
-                <button 
-                  type="button"
-                  className="members-modal-btn-close"
-                  onClick={() => setMembersModal({ isOpen: false, expense: null })}
-                  title="Close dialog"
-                  aria-label="Close"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Expense Summary Strip */}
-              <div className="members-modal-summary-strip">
-                <div className="summary-strip-main">
-                  <span className="summary-strip-amount">
-                    ₹ {Number(membersModal.expense.amount).toFixed(2)}
-                  </span>
-                  <div className="summary-strip-tags">
-                    <span className="summary-date-tag">
-                      <Calendar size={12} />
-                      {new Date(membersModal.expense.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
-                    {CATEGORIES[membersModal.expense.category] && (
-                      <span 
-                        className="summary-cat-tag"
-                        style={{
-                          borderColor: `${CATEGORIES[membersModal.expense.category].color}40`,
-                          color: CATEGORIES[membersModal.expense.category].color,
-                          background: `${CATEGORIES[membersModal.expense.category].color}15`
-                        }}
-                      >
-                        <span 
-                          style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            background: CATEGORIES[membersModal.expense.category].color
-                          }} 
-                        />
-                        {CATEGORIES[membersModal.expense.category].label}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="summary-payer-box">
-                  <span className="summary-payer-label">Paid by</span>
-                  <div className="summary-payer-row">
-                    <div className="payer-avatar-circle" style={{ width: '22px', height: '22px', fontSize: '0.7rem' }}>
-                      {(membersModal.expense.payer || '?')[0].toUpperCase()}
-                    </div>
-                    <span className="summary-payer-name">{membersModal.expense.payer}</span>
-                    {(membersModal.expense.payer || '').toLowerCase() === myHandle && (
-                      <span className="payer-self-tag">You</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Members List Section */}
-              {(() => {
-                const members = getMembersDetails(membersModal.expense);
-                const isCustom = members.some(m => m.isCustom);
-                const avgShare = Number(membersModal.expense.amount) / (members.length || 1);
-
-                return (
-                  <>
-                    <div className="members-modal-list-header">
-                      <div className="members-count-badge">
-                        <Users size={14} />
-                        <span>{members.length} {members.length === 1 ? 'Member' : 'Members'}</span>
-                      </div>
-                      <span className="members-split-type-note">
-                        {isCustom ? 'Custom Split' : `Equal Split (~₹ ${avgShare.toFixed(2)} / person)`}
-                      </span>
-                    </div>
-
-                    <div className="members-modal-list">
-                      {members.map((m, idx) => {
-                        const isMe = m.name.toLowerCase() === myHandle;
-                        const isPayer = m.name.toLowerCase() === (membersModal.expense.payer || '').toLowerCase();
-
-                        return (
-                          <div key={idx} className={`members-modal-item ${isMe ? 'is-self' : ''}`}>
-                            <div className="members-item-left">
-                              <div className="member-avatar-circle">
-                                {(m.name || '?')[0].toUpperCase()}
-                              </div>
-                              <div className="member-name-block">
-                                <div className="member-name-row">
-                                  <span className="member-display-name">{m.name}</span>
-                                  {isMe && <span className="member-badge-you">You</span>}
-                                  {isPayer && <span className="member-badge-payer">Payer</span>}
-                                </div>
-                                <span className="member-role-sub">
-                                  {isPayer && isMe ? 'Payer & Contributor' : isPayer ? 'Paid full amount' : 'Split contributor'}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="members-item-right">
-                              <span className="member-share-val">
-                                ₹ {m.share.toFixed(2)}
-                              </span>
-                              <span className="member-share-sub">share</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                );
-              })()}
-
-              {/* Modal Actions */}
-              <div className="members-modal-actions">
-                <button 
-                  type="button"
-                  className="btn-members-modal-done"
-                  onClick={() => setMembersModal({ isOpen: false, expense: null })}
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
-
-      {/* Delete Confirmation Modal Dialog */}
-      {deleteModal.isOpen && (
-        <ModalPortal>
-          <div
-            className="modal-overlay"
-            onClick={() => setDeleteModal({ isOpen: false, id: null })}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(6px)',
-              zIndex: 99999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '1rem'
-            }}
-          >
-            <div
-              className="modal-content dashboard-modal-card"
-              onClick={e => e.stopPropagation()}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '12px',
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  color: '#ef4444',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Trash2 size={20} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-color)' }}>
-                    Delete Expense?
-                  </h3>
-                  <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 700 }}>
-                    Irreversible Operation
-                  </span>
-                </div>
-              </div>
-
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '1.75rem', lineHeight: '1.5' }}>
-                This expense record will be permanently deleted from the active tactical ledger. All associated calculations and member balances will be updated immediately.
-              </p>
-
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button
-                  onClick={() => setDeleteModal({ isOpen: false, id: null })}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-color)',
-                    background: 'transparent',
-                    color: 'var(--text-color)',
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={executeDelete}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: '12px',
-                    border: 'none',
-                    background: '#ef4444',
-                    color: '#ffffff',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)'
-                  }}
-                >
-                  Delete Record
                 </button>
               </div>
             </div>
