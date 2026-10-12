@@ -1142,27 +1142,97 @@
 }
 
 @media (max-width: 768px) {
-  .ledger-metrics-grid {
-    grid-template-columns: 1fr;
-  }
-
   .ledger-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .ledger-title-area h2 {
+    font-size: 1.55rem;
   }
 
   .ledger-header-actions {
     width: 100%;
+    display: flex;
+    gap: 0.5rem;
   }
 
   .btn-export-csv, .btn-log-expense-primary {
     flex: 1;
     justify-content: center;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  /* 2x2 compact metrics strip on mobile instead of 1 long column */
+  .ledger-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+  }
+
+  .ledger-metric-card {
+    padding: 0.95rem 1rem;
+    border-radius: 14px;
+    gap: 0.5rem;
+  }
+
+  .ledger-metric-value {
+    font-size: 1.3rem;
+  }
+
+  .ledger-metric-label {
+    font-size: 0.7rem;
+  }
+
+  .ledger-metric-icon-wrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .ledger-metric-icon-wrap svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .ledger-controls-panel {
+    padding: 1rem;
+    border-radius: 16px;
+    gap: 0.85rem;
+  }
+
+  .ledger-search-box {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .ledger-controls-actions-group {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .ledger-month-stepper {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .ledger-sort-select {
+    flex: 1;
+    min-width: 120px;
+    font-size: 0.78rem;
+  }
+
+  .ledger-segment-group {
+    flex-shrink: 0;
   }
 
   .ledger-filter-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.65rem;
   }
 
   .ledger-category-chips {
@@ -1170,10 +1240,18 @@
     padding-bottom: 0.4rem;
     flex-wrap: nowrap;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    width: 100%;
+  }
+
+  .ledger-category-chips::-webkit-scrollbar {
+    display: none;
   }
 
   .ledger-chip {
     flex-shrink: 0;
+    font-size: 0.72rem;
+    padding: 0.3rem 0.7rem;
   }
 
   .ledger-payer-tabs {
@@ -1185,5 +1263,57 @@
   .ledger-payer-tab {
     flex: 1;
     text-align: center;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  /* Table horizontal scroll preservation with minimum width */
+  .ledger-table {
+    min-width: 720px;
+  }
+
+  .ledger-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .ledger-expense-card {
+    padding: 1.15rem;
+    border-radius: 16px;
+    gap: 0.85rem;
+  }
+
+  .card-amount-large {
+    font-size: 1.45rem;
+  }
+
+  .delete-modal-card {
+    padding: 1.35rem;
+    border-radius: 20px;
+    max-width: 92%;
   }
 }
+
+@media (max-width: 480px) {
+  .ledger-title-area h2 {
+    font-size: 1.4rem;
+  }
+
+  .ledger-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .ledger-metric-card {
+    padding: 0.8rem 0.85rem;
+  }
+
+  .ledger-metric-value {
+    font-size: 1.15rem;
+  }
+
+  .ledger-metric-subtext {
+    font-size: 0.68rem;
+  }
+}
+

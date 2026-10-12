@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
+import './Dashboard.css';
 
 const CATEGORIES = {
   food: { label: 'Food & Rations', color: '#f59e0b' },
@@ -411,69 +412,38 @@ export const Dashboard = () => {
   const displayName = user?.display_name || myHandle || 'Operative';
 
   return (
-    <div className="view-section" style={{ maxWidth: '1440px', margin: '0 auto' }}>
+    <div className="view-section dashboard-view-container">
       
       {/* ── TOP HERO BAR ── */}
-      <header className="content-header" style={{ marginBottom: '2rem', flexWrap: 'wrap', gap: '1.25rem' }}>
-        <div className="header-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '999px',
-              background: 'rgba(79, 70, 229, 0.12)',
-              color: 'var(--primary)',
-              border: '1px solid rgba(79, 70, 229, 0.25)'
-            }}>
+      <header className="content-header dashboard-hero-header">
+        <div className="header-title dashboard-hero-title-area">
+          <div className="dashboard-badge-row">
+            <span className="dashboard-hq-badge">
               <Sparkles size={12} />
               FairShare HQ
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 600 }}>
+            <span className="dashboard-cycle-text">
               Cycle: 5th to Date
             </span>
           </div>
-          <h2 style={{ fontSize: '2.1rem', fontWeight: 900, letterSpacing: '-0.03em', margin: 0 }}>
+          <h2 className="dashboard-title-heading">
             Welcome back, {displayName}
           </h2>
-          <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.88rem', color: 'var(--text-dim)', fontWeight: 500 }}>
+          <p className="dashboard-subtitle-text">
             Here is your financial snapshot and squad expense ledger for this cycle.
           </p>
         </div>
 
-        <div className="header-actions" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div className="header-actions dashboard-hero-actions">
           {/* Quick Search */}
-          <div className="search-bar" style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            background: 'var(--card-bg)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '12px',
-            padding: '0.55rem 0.9rem',
-            gap: '0.5rem',
-            boxShadow: 'var(--shadow)'
-          }}>
+          <div className="search-bar dashboard-search-wrap">
             <Search size={16} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
             <input
               type="text"
               placeholder="Search expenses, payers..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: 'var(--text-color)',
-                fontSize: '0.85rem',
-                minWidth: '180px',
-                padding: 0
-              }}
+              className="dashboard-search-input"
             />
             {searchQuery && (
               <button
@@ -486,23 +456,12 @@ export const Dashboard = () => {
           </div>
 
           {/* Month Selector */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div className="dashboard-month-select-wrap">
             <Calendar size={16} style={{ position: 'absolute', left: '0.85rem', color: 'var(--text-dim)', pointerEvents: 'none' }} />
             <select
               value={selectedMonth}
               onChange={e => setSelectedMonth(e.target.value)}
-              style={{
-                appearance: 'none',
-                padding: '0.55rem 2rem 0.55rem 2.3rem',
-                borderRadius: '12px',
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-color)',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow)'
-              }}
+              className="dashboard-month-select"
             >
               {monthOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -514,21 +473,7 @@ export const Dashboard = () => {
           {/* New Expense Button */}
           <Link
             to="/expenses/new"
-            style={{
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
-              color: '#ffffff',
-              padding: '0.6rem 1.15rem',
-              borderRadius: '12px',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
+            className="dashboard-split-btn"
           >
             <Plus size={18} strokeWidth={2.5} />
             <span>Split Expense</span>
@@ -537,154 +482,88 @@ export const Dashboard = () => {
       </header>
 
       {/* ── 4-CARD EXECUTIVE KPI STRIP ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: '1.25rem',
-        marginBottom: '2rem'
-      }}>
+      <div className="dashboard-kpi-grid">
         {/* Metric 1: Monthly Total Volume */}
-        <div className="card" style={{
-          padding: '1.25rem 1.4rem',
-          borderRadius: '16px',
-          border: '1px solid var(--border-color)',
-          background: 'var(--card-bg)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div className="card dashboard-kpi-card">
+          <div className="kpi-card-header">
+            <span className="kpi-card-label">
               Monthly Volume
             </span>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'rgba(59, 130, 246, 0.12)',
-              color: '#3b82f6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <div className="kpi-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' }}>
               <DollarSign size={18} strokeWidth={2.5} />
             </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, color: 'var(--text-color)', letterSpacing: '-0.02em', marginBottom: '0.35rem' }}>
+          <div className="kpi-value-text">
             ₹ {totalVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <div className="kpi-subtext">
             <Receipt size={13} />
             <span>{totalEntries} transactions recorded</span>
           </div>
         </div>
 
         {/* Metric 2: You Paid Out */}
-        <div className="card" style={{
-          padding: '1.25rem 1.4rem',
-          borderRadius: '16px',
-          border: '1px solid var(--border-color)',
-          background: 'var(--card-bg)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div className="card dashboard-kpi-card">
+          <div className="kpi-card-header">
+            <span className="kpi-card-label">
               You Paid Out
             </span>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'rgba(16, 185, 129, 0.12)',
-              color: '#10b981',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <div className="kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
               <ArrowUpRight size={18} strokeWidth={2.5} />
             </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, color: 'var(--text-color)', letterSpacing: '-0.02em', marginBottom: '0.35rem' }}>
+          <div className="kpi-value-text">
             ₹ {totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <div className="kpi-subtext">
             <Wallet size={13} />
             <span>Disbursed out of pocket</span>
           </div>
         </div>
 
         {/* Metric 3: Your Fair Share */}
-        <div className="card" style={{
-          padding: '1.25rem 1.4rem',
-          borderRadius: '16px',
-          border: '1px solid var(--border-color)',
-          background: 'var(--card-bg)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div className="card dashboard-kpi-card">
+          <div className="kpi-card-header">
+            <span className="kpi-card-label">
               Your Fair Share
             </span>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'rgba(139, 92, 246, 0.12)',
-              color: '#8b5cf6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <div className="kpi-icon-wrap" style={{ background: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6' }}>
               <Activity size={18} strokeWidth={2.5} />
             </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, color: 'var(--text-color)', letterSpacing: '-0.02em', marginBottom: '0.35rem' }}>
+          <div className="kpi-value-text">
             ₹ {totalShare.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <div className="kpi-subtext">
             <CreditCard size={13} />
             <span>Your personal liability</span>
           </div>
         </div>
 
         {/* Metric 4: Net Balance Position */}
-        <div className="card" style={{
-          padding: '1.25rem 1.4rem',
-          borderRadius: '16px',
-          border: `1px solid ${netBalance >= 0 ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)'}`,
-          background: netBalance >= 0 ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)',
-          boxShadow: 'var(--shadow)'
+        <div className="card dashboard-kpi-card" style={{
+          borderColor: netBalance >= 0 ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)',
+          background: netBalance >= 0 ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div className="kpi-card-header">
+            <span className="kpi-card-label">
               Net Position
             </span>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
+            <div className="kpi-icon-wrap" style={{
               background: netBalance >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-              color: netBalance >= 0 ? '#10b981' : '#ef4444',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              color: netBalance >= 0 ? '#10b981' : '#ef4444'
             }}>
               {netBalance >= 0 ? <TrendingUp size={18} strokeWidth={2.5} /> : <ArrowDownRight size={18} strokeWidth={2.5} />}
             </div>
           </div>
-          <div style={{
-            fontSize: '1.65rem',
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
-            marginBottom: '0.35rem',
+          <div className="kpi-value-text" style={{
             color: netBalance >= 0 ? '#10b981' : '#ef4444'
           }}>
             {netBalance >= 0 ? '+' : ''}₹ {Math.abs(netBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div style={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
+          <div className="kpi-subtext" style={{
             color: netBalance >= 0 ? '#10b981' : '#ef4444',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem'
+            fontWeight: 700
           }}>
             <span>{netBalance >= 0 ? '● You are owed overall' : '● You owe overall'}</span>
           </div>
@@ -692,26 +571,15 @@ export const Dashboard = () => {
       </div>
 
       {/* ── 2-COLUMN MAIN WORKSPACE GRID ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1.8fr) minmax(320px, 1.2fr)',
-        gap: '1.75rem',
-        alignItems: 'start'
-      }}>
+      <div className="dashboard-workspace-grid">
 
         {/* ── LEFT COLUMN: LEDGER / RECENT ACTIVITY ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
+        <div className="dashboard-left-col">
           
-          <div className="card" style={{
-            borderRadius: '20px',
-            padding: '1.5rem',
-            background: 'var(--card-bg)',
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--shadow)'
-          }}>
+          <div className="card tactical-ledger-card">
             
             {/* Header + Filter Chips */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+            <div className="tactical-ledger-header">
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-color)' }}>
                   Tactical Ledger
@@ -722,21 +590,10 @@ export const Dashboard = () => {
               </div>
 
               {/* Category Filter Chips */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <div className="tactical-chips-scroll">
                 <button
                   onClick={() => setCategoryFilter('all')}
-                  style={{
-                    border: '1px solid',
-                    borderColor: categoryFilter === 'all' ? 'var(--primary)' : 'var(--border-color)',
-                    background: categoryFilter === 'all' ? 'rgba(79, 70, 229, 0.12)' : 'transparent',
-                    color: categoryFilter === 'all' ? 'var(--primary)' : 'var(--text-dim)',
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
+                  className={`tactical-chip-btn ${categoryFilter === 'all' ? 'active' : ''}`}
                 >
                   All Ops ({activeExpenses.length})
                 </button>
@@ -747,17 +604,11 @@ export const Dashboard = () => {
                     <button
                       key={k}
                       onClick={() => setCategoryFilter(k)}
+                      className={`tactical-chip-btn ${isActive ? 'active' : ''}`}
                       style={{
-                        border: '1px solid',
                         borderColor: isActive ? CATEGORIES[k].color : 'var(--border-color)',
-                        background: isActive ? `${CATEGORIES[k].color}18` : 'transparent',
                         color: isActive ? CATEGORIES[k].color : 'var(--text-dim)',
-                        padding: '0.35rem 0.75rem',
-                        borderRadius: '999px',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
+                        background: isActive ? `${CATEGORIES[k].color}18` : 'transparent'
                       }}
                     >
                       {CATEGORIES[k].label} {count > 0 && `(${count})`}
@@ -816,7 +667,7 @@ export const Dashboard = () => {
                 </Link>
               </div>
             ) : (
-              <div className="table-wrapper" style={{ overflowX: 'auto', borderRadius: '12px' }}>
+              <div className="dashboard-table-scroll-wrap no-card-layout">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                   <thead>
                     <tr style={{
@@ -955,7 +806,7 @@ export const Dashboard = () => {
         </div>
 
         {/* ── RIGHT COLUMN: CHARTS & SQUAD QUICK SETTLEMENTS ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
+        <div className="dashboard-right-col">
 
           {/* Widget 1: Category Breakdown Doughnut Chart */}
           <div className="card" style={{
@@ -1185,17 +1036,8 @@ export const Dashboard = () => {
             }}
           >
             <div
-              className="modal-content"
+              className="modal-content dashboard-modal-card"
               onClick={e => e.stopPropagation()}
-              style={{
-                width: '100%',
-                maxWidth: '420px',
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '24px',
-                padding: '2rem',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
-              }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-color)' }}>
@@ -1290,17 +1132,8 @@ export const Dashboard = () => {
             }}
           >
             <div
-              className="modal-content"
+              className="modal-content dashboard-modal-card"
               onClick={e => e.stopPropagation()}
-              style={{
-                width: '100%',
-                maxWidth: '420px',
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '24px',
-                padding: '2rem',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
-              }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div style={{

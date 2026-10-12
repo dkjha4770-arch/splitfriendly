@@ -617,7 +617,7 @@ export const Expenses = () => {
         </div>
       ) : viewMode === 'table' ? (
         /* Redesigned Table View */
-        <div className="ledger-card-table-wrap">
+        <div className="ledger-card-table-wrap no-card-layout">
           <div className="ledger-table-header-info">
             <h3>
               <Layers size={18} style={{ color: 'var(--primary)' }} />
