@@ -22,11 +22,14 @@ import {
   X,
   ChevronRight,
   Receipt,
-  Sparkles
+  Sparkles,
+  List,
+  LayoutGrid
 } from 'lucide-react';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 import './Dashboard.css';
+import './Expenses.css';
 
 const CATEGORIES = {
   food: { label: 'Food & Rations', color: '#f59e0b' },
@@ -70,6 +73,7 @@ export const Dashboard = () => {
   const [selectedSquadForSettlements, setSelectedSquadForSettlements] = useState(() => {
     return initialCache?.squads?.[0]?.name || null;
   });
+  const [viewMode, setViewMode] = useState('grid'); // Default to 'grid' (cards view), or 'table'
 
   // Modal State for Confirm Settle
   const [settlementModal, setSettlementModal] = useState({
@@ -161,6 +165,21 @@ export const Dashboard = () => {
 
   const totalEntries = activeExpenses.length;
   const myHandle = user?.username ? user.username.split('@')[0].toLowerCase() : '';
+
+  // Helper: parse members cleanly
+  const parseMembers = (members) => {
+    try {
+      const parsed = typeof members === 'string' ? JSON.parse(members || '[]') : members;
+      if (Array.isArray(parsed)) {
+        return parsed.map(m => String(m));
+      } else if (parsed && typeof parsed === 'object') {
+        return Object.keys(parsed).map(k => String(k));
+      }
+    } catch (_) {
+      return members ? [String(members)] : [];
+    }
+    return [];
+  };
 
   // Calculate Net Personal Balance (spent vs share in selected month)
   const { totalSpent, totalShare, categoryTotals, netBalance } = useMemo(() => {
@@ -578,9 +597,9 @@ export const Dashboard = () => {
           
           <div className="card tactical-ledger-card">
             
-            {/* Header + Filter Chips */}
+            {/* Header + Actions */}
             <div className="tactical-ledger-header">
-              <div>
+              <div className="tactical-header-info">
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-color)' }}>
                   Tactical Ledger
                 </h3>
@@ -589,33 +608,55 @@ export const Dashboard = () => {
                 </span>
               </div>
 
-              {/* Category Filter Chips */}
-              <div className="tactical-chips-scroll">
-                <button
-                  onClick={() => setCategoryFilter('all')}
-                  className={`tactical-chip-btn ${categoryFilter === 'all' ? 'active' : ''}`}
-                >
-                  All Ops ({activeExpenses.length})
-                </button>
-                {Object.keys(CATEGORIES).map(k => {
-                  const count = activeExpenses.filter(e => e.category === k).length;
-                  const isActive = categoryFilter === k;
-                  return (
-                    <button
-                      key={k}
-                      onClick={() => setCategoryFilter(k)}
-                      className={`tactical-chip-btn ${isActive ? 'active' : ''}`}
-                      style={{
-                        borderColor: isActive ? CATEGORIES[k].color : 'var(--border-color)',
-                        color: isActive ? CATEGORIES[k].color : 'var(--text-dim)',
-                        background: isActive ? `${CATEGORIES[k].color}18` : 'transparent'
-                      }}
-                    >
-                      {CATEGORIES[k].label} {count > 0 && `(${count})`}
-                    </button>
-                  );
-                })}
+              <div className="tactical-header-actions">
+                {/* View Mode Segment Toggle */}
+                <div className="ledger-segment-group">
+                  <button 
+                    className={`ledger-segment-btn ${viewMode === 'table' ? 'active' : ''}`}
+                    onClick={() => setViewMode('table')}
+                    title="Table View"
+                  >
+                    <List size={14} />
+                    <span>Table</span>
+                  </button>
+                  <button 
+                    className={`ledger-segment-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                    onClick={() => setViewMode('grid')}
+                    title="Card View"
+                  >
+                    <LayoutGrid size={14} />
+                    <span>Cards</span>
+                  </button>
+                </div>
               </div>
+            </div>
+
+            {/* Category Filter Chips */}
+            <div className="tactical-chips-scroll" style={{ marginBottom: '1.25rem' }}>
+              <button
+                onClick={() => setCategoryFilter('all')}
+                className={`tactical-chip-btn ${categoryFilter === 'all' ? 'active' : ''}`}
+              >
+                All Ops ({activeExpenses.length})
+              </button>
+              {Object.keys(CATEGORIES).map(k => {
+                const count = activeExpenses.filter(e => e.category === k).length;
+                const isActive = categoryFilter === k;
+                return (
+                  <button
+                    key={k}
+                    onClick={() => setCategoryFilter(k)}
+                    className={`tactical-chip-btn ${isActive ? 'active' : ''}`}
+                    style={{
+                      borderColor: isActive ? CATEGORIES[k].color : 'var(--border-color)',
+                      color: isActive ? CATEGORIES[k].color : 'var(--text-dim)',
+                      background: isActive ? `${CATEGORIES[k].color}18` : 'transparent'
+                    }}
+                  >
+                    {CATEGORIES[k].label} {count > 0 && `(${count})`}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Table or Empty State */}
@@ -666,7 +707,7 @@ export const Dashboard = () => {
                   <span>Log First Expense</span>
                 </Link>
               </div>
-            ) : (
+            ) : viewMode === 'table' ? (
               <div className="dashboard-table-scroll-wrap no-card-layout">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                   <thead>
@@ -800,6 +841,99 @@ export const Dashboard = () => {
                     })}
                   </tbody>
                 </table>
+              </div>
+            ) : (
+              /* Redesigned Card / Grid View */
+              <div className="ledger-cards-grid">
+                {filteredExpenses.map(e => {
+                  const membersList = parseMembers(e.members);
+                  const isPayerMe = (e.payer || '').toLowerCase() === myHandle;
+                  const catColor = CATEGORIES[e.category]?.color || '#868e96';
+
+                  return (
+                    <div key={e.id} className="ledger-expense-card">
+                      <div className="card-top-bar">
+                        <div className="card-date-badge">
+                          <Calendar size={12} />
+                          <span>{new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                        <span 
+                          className="ledger-cat-badge"
+                          style={{
+                            borderColor: `${catColor}35`,
+                            background: `${catColor}12`,
+                            color: catColor
+                          }}
+                        >
+                          <span 
+                            className="ledger-cat-dot" 
+                            style={{ background: catColor }}
+                          />
+                          {CATEGORIES[e.category]?.label || e.category}
+                        </span>
+                      </div>
+
+                      <div className="card-main-info">
+                        <h4 className="card-objective-title">{e.where_spent}</h4>
+                        <div className="card-amount-large">
+                          ₹ {Number(e.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+
+                        <div className="card-metadata-pills">
+                          {e.squad_name && (
+                            <span className="cell-squad-badge">
+                              <Users size={11} />
+                              Squad: {e.squad_name}
+                            </span>
+                          )}
+                          <span className={`ledger-app-badge ${PAYMENT_APPS[e.payment_app]?.badge || 'app-badge-green'}`}>
+                            {PAYMENT_APPS[e.payment_app]?.label || e.payment_app}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="card-split-section">
+                        <div className="card-split-row">
+                          <span className="card-split-label">Payer</span>
+                          <div className="cell-payer-pill">
+                            <div className="payer-avatar-circle" style={{ width: '20px', height: '20px', fontSize: '0.65rem' }}>
+                              {(e.payer || '?')[0].toUpperCase()}
+                            </div>
+                            <span>{e.payer}</span>
+                            {isPayerMe && <span className="payer-self-tag">You</span>}
+                          </div>
+                        </div>
+
+                        <div className="card-split-row" style={{ alignItems: 'flex-start', marginTop: '0.2rem' }}>
+                          <span className="card-split-label">Allocated to</span>
+                          <div className="cell-members-wrap" style={{ justifyContent: 'flex-end', maxWidth: '180px' }}>
+                            {membersList.slice(0, 3).map((m, idx) => (
+                              <span key={idx} className="member-chip">{m}</span>
+                            ))}
+                            {membersList.length > 3 && (
+                              <span className="member-chip-more" title={membersList.join(', ')}>
+                                +{membersList.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="card-footer">
+                        <span>
+                          {e.created_at ? 'Logged ' + new Date(e.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Logged'}
+                        </span>
+                        <button 
+                          className="btn-delete-row"
+                          onClick={() => triggerDelete(e.id)}
+                          title="Delete entry"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

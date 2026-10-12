@@ -259,7 +259,26 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.tactical-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tactical-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tactical-ledger-card .ledger-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.15rem;
+  width: 100%;
 }
 
 .tactical-chips-scroll {
@@ -414,6 +433,11 @@
   /* Ensure table has minimum width so it scrolls cleanly on mobile without columns crushing */
   .dashboard-table-scroll-wrap table {
     min-width: 620px;
+  }
+
+  .tactical-ledger-card .ledger-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
   }
 }
 
